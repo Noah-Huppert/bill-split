@@ -19,3 +19,11 @@ services:
     ports:
       - 8000:8000
     restart: always
+  mongo:
+    image: mongo:6.0.7
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=bill-split
+      - MONGO_INITDB_ROOT_PASSWORD=bill-split
+      - MONGO_INITDB_DATABASE=bill-split
+    volumes:
+      - mongo-data:/data/db

@@ -5,7 +5,8 @@
   "main": "src/index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon --config ./nodemon.json"
+    "dev": "nodemon --config ./nodemon.json",
+    "format": "prettier --write ."
   },
   "repository": {
     "type": "git",
@@ -18,10 +19,12 @@
   },
   "homepage": "https://github.com/Noah-Huppert/bill-split#readme",
   "dependencies": {
-    "@trpc/server": "^10.33.0"
+    "@trpc/server": "^10.33.0",
+    "mongoose": "^7.3.1"
   },
   "devDependencies": {
     "nodemon": "^2.0.22",
+    "prettier": "^2.8.8",
     "ts-node": "^10.9.1"
   }
 }
