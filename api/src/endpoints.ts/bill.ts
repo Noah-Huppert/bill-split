@@ -1,7 +1,5 @@
 import { publicProcedure } from "../trpc";
 
 export const endpoints = {
-    billList: publicProcedure.query(async () => {
-        
-    })
+  billList: publicProcedure.query(async () => {}),
 };
