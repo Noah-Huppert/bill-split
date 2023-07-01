@@ -22,8 +22,10 @@ services:
   mongo:
     image: mongo:6.0.7
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=bill-split
-      - MONGO_INITDB_ROOT_PASSWORD=bill-split
+      - MONGO_INITDB_ROOT_USERNAME=billsplit
+      - MONGO_INITDB_ROOT_PASSWORD=billsplit
       - MONGO_INITDB_DATABASE=bill-split
     volumes:
       - mongo-data:/data/db
+volumes:
+  mongo-data: {}

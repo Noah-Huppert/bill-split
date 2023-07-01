@@ -22,6 +22,6 @@ export function configFromEnv(): Config {
     port: parseInt(process.env?.API_PORT || "8000"),
     mongoURI:
       process.env?.API_MONGO_URI ||
-      "mongodb://bill-split:bill-split@mongo/bill-split",
+      "mongodb://billsplit:billsplit@mongo:27017/bill-split?authSource=admin",
   };
 }
