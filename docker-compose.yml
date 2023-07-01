@@ -8,3 +8,14 @@ services:
       - ./frontend:/opt/frontend/
     ports:
       - 5173:5173
+    restart: always
+  api:
+    build:
+      context: ./api
+      dockerfile: dev.Dockerfile
+    hostname: api
+    volumes:
+      - ./api:/opt/api
+    ports:
+      - 8000:8000
+    restart: always
