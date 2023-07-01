@@ -1,0 +1,11 @@
+{
+    "verbose": true,
+    "ext": "ts",
+    "watch": [
+        "./src"
+    ],
+    "ignore": [
+        "node_modules/"
+    ],
+    "exec": "ts-node ./src/index.ts"
+}

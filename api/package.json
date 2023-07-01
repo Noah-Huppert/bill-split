@@ -2,10 +2,10 @@
   "name": "api",
   "version": "0.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "sleep infinity"
+    "dev": "nodemon --config ./nodemon.json"
   },
   "repository": {
     "type": "git",
@@ -19,5 +19,9 @@
   "homepage": "https://github.com/Noah-Huppert/bill-split#readme",
   "dependencies": {
     "@trpc/server": "^10.33.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22",
+    "ts-node": "^10.9.1"
   }
 }
