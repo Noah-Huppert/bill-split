@@ -1,5 +1,6 @@
 import { createHTTPServer } from "@trpc/server/adapters/standalone";
 import mongoose from "mongoose";
+import cors from "cors";
 
 import { router } from "./trpc";
 import { configFromEnv } from "./config";
@@ -20,7 +21,8 @@ async function main() {
 
     // Setup TRPC
     const server = createHTTPServer({
-        router: appRouter,
+      middleware: cors(),
+      router: appRouter,
     });
 
     console.log(`Running API on :${cfg.port}`);

@@ -10,6 +10,11 @@ export interface IBill {
   id: Types.ObjectId;
 
   /**
+   * Name of bill.
+   */
+  name: string;
+
+  /**
    * Users which will split the items.
    */
   users: IUser[];
@@ -126,6 +131,7 @@ export interface IProportionalCharge {
  * Mongoose schema representation of {@link IBill}.
  */
 const BillSchema = new Schema<IBill>({
+  name: { type: String, required: true },
   users: [
     {
       id: { type: Types.ObjectId, alias: "_id", required: true },

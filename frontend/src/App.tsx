@@ -19,7 +19,7 @@ const router = createHashRouter([
 export const trpc = createTRPCProxyClient<AppRouter>({
   links: [
     httpBatchLink({
-      url: "http://api:8000",
+      url: "http://localhost:8000",
     }),
   ],
 });
