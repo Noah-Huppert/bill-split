@@ -5,6 +5,7 @@ import {
   Card,
   CardContent,
   TextField,
+  Typography,
 } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -46,11 +47,11 @@ export function CreateBill() {
       <div className="create-bill-container">
         <Card className="margin-top-1 create-bill-card">
           <CardContent>
-            <div className="font-title">New Bill</div>
+            <Typography variant="h5">New Bill</Typography>
 
-            <div className="font-hint">
+            <Typography variant="subtitle1">
               Create a new bill. Split line items, tip, and tax.
-            </div>
+            </Typography>
 
             <form className="margin-top-2" onSubmit={onSubmit}>
               <TextField

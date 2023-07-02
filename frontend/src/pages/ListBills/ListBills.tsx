@@ -1,6 +1,6 @@
 import { useEffect, useState, useContext, useCallback } from "react";
 import KayakingIcon from "@mui/icons-material/Kayaking";
-import { Box, Button, List, ListItemButton, ListItemText } from "@mui/material";
+import { Box, Button, List, ListItemButton, ListItemText, Typography } from "@mui/material";
 import AddBusinessIcon from "@mui/icons-material/AddBusiness";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -15,7 +15,7 @@ export function ListBills() {
   return (
     <>
       <div className="list-bills-header">
-        <div className="font-title">Bills</div>
+        <Typography variant="h5">Bills</Typography>
         <Link to={ROUTES.bills.create}>
           <Button
             variant="contained"
@@ -63,14 +63,14 @@ function BillsList() {
             fontSize: "5rem",
           }}
         />
-        <p className="font-title">No Bills</p>
+        <Typography variant="h5">No Bills</Typography>
       </div>
     );
   }
 
   return (
 		<Box sx={{
-			boxShadow: 3,
+			boxShadow: 10,
 		}}>
 			<List>
 				{bills.map((bill) => (

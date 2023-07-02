@@ -1,5 +1,5 @@
 import { useState, useContext, useCallback, useEffect } from "react";
-import { Breadcrumbs } from "@mui/material";
+import { Breadcrumbs, Typography } from "@mui/material";
 import { Link, useParams } from "react-router-dom";
 
 import { ROUTES } from "../../routes";
@@ -42,7 +42,7 @@ export function ViewBill() {
   }
 
   if (!bill) {
-    return <div className="font-title">Bill Not Found</div>;
+    return <Typography variant="h5">Bill Not Found</Typography>;
   }
 
   return (
