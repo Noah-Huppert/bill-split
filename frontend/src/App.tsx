@@ -7,6 +7,8 @@ import "./styles";
 import type { AppRouter } from "../../api/src/index";
 import { Home } from "./pages/Home";
 import ErrorBoundary from "./components/ErrorBoundary";
+import Container from "@mui/material/Container";
+import { MenuBar } from "./components/MenuBar";
 
 const router = createHashRouter([
   {
@@ -24,12 +26,13 @@ export const trpc = createTRPCProxyClient<AppRouter>({
   ],
 });
 
-function App() {
+export function App() {
   return (
     <ErrorBoundary>
-      <RouterProvider router={router}></RouterProvider>
+      <MenuBar />
+      <Container>
+        <RouterProvider router={router}></RouterProvider>
+      </Container>
     </ErrorBoundary>
   );
 }
-
-export default App;

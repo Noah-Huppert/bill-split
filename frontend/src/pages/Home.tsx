@@ -1,13 +1,56 @@
 import { useEffect, useState, useContext, useCallback } from "react";
+import KayakingIcon from '@mui/icons-material/Kayaking';
+import { Button, CircularProgress, List, ListItemButton, ListItemText } from "@mui/material";
+import AddBusinessIcon from '@mui/icons-material/AddBusiness';
+import styled from "styled-components";
 
 import { trpc } from "../App";
 import { ErrorReporter } from "../components/ErrorBoundary";
 import { IBill } from "../../../api/src/models/bill";
-import { CircularProgress, List, ListItemButton, ListItemText } from "@mui/material";
+import { COLORS } from "../styles";
+
+const NotFoundContainer = styled.div`
+display: flex;
+flex-direction: column;
+align-items: center;
+`;
+
+const NotFoundMsg = styled.p`
+font-size: 2rem;
+`;
+
+const HomeHeader = styled.div`
+display: flex;
+flex-direction: row;
+justify-content: space-between;
+`;
+
+const Title = styled.div`
+font-size: 2rem;
+`;
+
+const CreateButton = styled(Button)`
+background: ${COLORS.secondary} !important;
+`;
+
+const CreateButtonText = styled.div`
+margin-left: 0.5rem;
+`;
 
 export function Home() {
   return (
 		<>
+			<HomeHeader>
+				<Title>
+					Bills
+				</Title>
+				<CreateButton variant="contained">
+					<AddBusinessIcon fontSize="medium" />
+					<CreateButtonText>
+						New Bill
+					</CreateButtonText>
+				</CreateButton>
+			</HomeHeader>
 			<BillsList />
 		</>
 	);
@@ -34,7 +77,12 @@ function BillsList() {
 	}
 
 	if (bills.length == 0) {
-		return <>No bills...</>
+		return <NotFoundContainer>
+			<KayakingIcon sx={{
+				fontSize: "5rem",
+			}} />
+			<NotFoundMsg>No Bills</NotFoundMsg>
+		</NotFoundContainer>
 	}
 
 	return (
