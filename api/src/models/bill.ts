@@ -126,7 +126,6 @@ export interface IProportionalCharge {
  * Mongoose schema representation of {@link IBill}.
  */
 const BillSchema = new Schema<IBill>({
-  id: { type: Types.ObjectId, alias: "_id", required: true },
   users: [
     {
       id: { type: Types.ObjectId, alias: "_id", required: true },
@@ -174,4 +173,4 @@ const BillSchema = new Schema<IBill>({
 /**
  * Model repository for {@link IBill}.
  */
-export const Bill = model("Bill", BillSchema);
+export const Bill = model<IBill>("Bill", BillSchema);

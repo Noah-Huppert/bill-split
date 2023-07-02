@@ -3,6 +3,11 @@ import mongoose from "mongoose";
 
 import { router } from "./trpc";
 import { configFromEnv } from "./config";
+import { endpoints } from "./endpoints.ts";
+
+const appRouter = router(endpoints);
+
+export type AppRouter = typeof appRouter;
 
 async function main() {
     // Load configuration
@@ -14,10 +19,6 @@ async function main() {
     console.log("Connected to MongoDB");
 
     // Setup TRPC
-    const appRouter = router({});
-
-    //export type AppRouter = typeof appRouter;
-
     const server = createHTTPServer({
         router: appRouter,
     });
