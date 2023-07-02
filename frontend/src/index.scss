@@ -1,5 +1,39 @@
+// Overrides
 body {
   padding: 0;
   margin: 0;
   font-family: "Noto Sans";
+}
+
+a {
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+// Colors
+// https://coolors.co/d972ff-090c9b-ff6663-e0ff4f-fefffe
+$primary: #0b3954;
+$secondary: #7768AE;
+$alert: #ff6663;
+$ascent: #e0ff4f;
+$foreground:#fefffe;
+
+.background-primary {
+  background: $primary;
+}
+
+.background-secondary {
+  background: $secondary;
+}
+
+.color-foreground {
+  color: $foreground;
+}
+
+// Typography
+.font-title {
+  font-size: 1.5rem;
 }

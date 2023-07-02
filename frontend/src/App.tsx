@@ -5,11 +5,12 @@ import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
 import "./styles";
 
 import type { AppRouter } from "../../api/src/index";
-import { ListBills } from "./pages/ListBills";
+import { ListBills } from "./pages/ListBills/ListBills";
 import ErrorBoundary from "./components/ErrorBoundary";
-import { CreateBill } from "./pages/CreateBill";
+import { CreateBill } from "./pages/CreateBill/CreateBill";
 import { ROUTES } from "./routes";
 import { Page } from "./components/Page";
+import { createTheme, ThemeProvider } from "@mui/material";
 
 const router = createHashRouter([
   {
@@ -34,11 +35,23 @@ export const trpc = createTRPCProxyClient<AppRouter>({
   ],
 });
 
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: "#0b3954",
+    },
+    secondary: {
+      main: "#7768AE",
+    }
+  },
+})
+
 export function App() {
   return (
-    <ErrorBoundary>
-      
-        <RouterProvider router={router}></RouterProvider>
-    </ErrorBoundary>
+    <ThemeProvider theme={theme}>
+      <ErrorBoundary>
+          <RouterProvider router={router}></RouterProvider>
+      </ErrorBoundary>
+    </ThemeProvider>
   );
 }

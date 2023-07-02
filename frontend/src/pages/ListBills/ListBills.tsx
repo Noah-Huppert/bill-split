@@ -2,59 +2,30 @@ import { useEffect, useState, useContext, useCallback } from "react";
 import KayakingIcon from '@mui/icons-material/Kayaking';
 import { Button, CircularProgress, List, ListItemButton, ListItemText } from "@mui/material";
 import AddBusinessIcon from '@mui/icons-material/AddBusiness';
-import styled from "styled-components";
-
-import { trpc } from "../App";
-import { ErrorReporter } from "../components/ErrorBoundary";
-import { IBill } from "../../../api/src/models/bill";
-import { COLORS } from "../styles";
 import { Link } from "react-router-dom";
-import { ROUTES } from "../routes";
 
-const NotFoundContainer = styled.div`
-display: flex;
-flex-direction: column;
-align-items: center;
-`;
-
-const NotFoundMsg = styled.p`
-font-size: 2rem;
-`;
-
-const Header = styled.div`
-display: flex;
-flex-direction: row;
-justify-content: space-between;
-`;
-
-const Title = styled.div`
-font-size: 2rem;
-`;
-
-const CreateButton = styled(Button)`
-background: ${COLORS.secondary} !important;
-`;
-
-const CreateButtonText = styled.div`
-margin-left: 0.5rem;
-`;
+import { trpc } from "../../App";
+import { ErrorReporter } from "../../components/ErrorBoundary";
+import { IBill } from "../../../../api/src/models/bill";
+import { ROUTES } from "../../routes";
+import "./ListBills.scss";
 
 export function ListBills() {
   return (
 		<>
-			<Header>
-				<Title>
+			<div className="list-bills-header">
+				<div className="font-title">
 					Bills
-				</Title>
+				</div>
 				<Link to={ROUTES.bills.create}>
-				<CreateButton variant="contained">
-					<AddBusinessIcon fontSize="medium" />
-					<CreateButtonText>
-						New Bill
-					</CreateButtonText>
-				</CreateButton>
+					<Button variant="contained" className="create-button" color="secondary">
+						<AddBusinessIcon fontSize="medium" />
+						<div>
+							New Bill
+						</div>
+					</Button>
 				</Link>
-			</Header>
+			</div>
 			<BillsList />
 		</>
 	);
@@ -81,12 +52,12 @@ function BillsList() {
 	}
 
 	if (bills.length == 0) {
-		return <NotFoundContainer>
+		return <div className="bills-not-found">
 			<KayakingIcon sx={{
 				fontSize: "5rem",
 			}} />
-			<NotFoundMsg>No Bills</NotFoundMsg>
-		</NotFoundContainer>
+			<p className="font-title">No Bills</p>
+		</div>
 	}
 
 	return (
