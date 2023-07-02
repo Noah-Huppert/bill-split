@@ -9,7 +9,7 @@ export function MenuBar() {
   return (
     <Link
       to={ROUTES.apex}
-      className="background-primary color-foreground menu-bar"
+      className="background-primary color-background menu-bar"
     >
         <SavingsIcon
           fontSize="large"

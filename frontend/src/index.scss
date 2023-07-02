@@ -1,25 +1,12 @@
-// Overrides
-body {
-  padding: 0;
-  margin: 0;
-  font-family: "Noto Sans";
-}
-
-a {
-  text-decoration: none;
-
-  &:hover {
-    text-decoration: underline;
-  }
-}
-
 // Colors
 // https://coolors.co/d972ff-090c9b-ff6663-e0ff4f-fefffe
 $primary: #0b3954;
 $secondary: #7768AE;
 $alert: #ff6663;
 $ascent: #e0ff4f;
-$foreground:#fefffe;
+$background:#fefffe;
+$foreground: #000000;
+$border: lighten($foreground, 80%);
 
 .background-primary {
   background: $primary;
@@ -33,7 +20,51 @@ $foreground:#fefffe;
   color: $foreground;
 }
 
+.color-background {
+  color: $background;
+}
+
+// Overrides
+body {
+  padding: 0;
+  margin: 0;
+  font-family: "Noto Sans";
+}
+
+a {
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:link {
+    color: $primary;
+  }
+
+  &:visited {
+    color: $secondary;
+  }
+}
+
 // Typography
 .font-title {
   font-size: 1.5rem;
+}
+
+.font-hint {
+  font-size: 0.8rem;
+}
+
+// Padding & margin
+.margin-bottom-1 {
+  margin-bottom: 1rem;
+}
+
+.margin-top-1 {
+  margin-top: 1rem;
+}
+
+.margin-top-2 {
+  margin-top: 2rem;
 }

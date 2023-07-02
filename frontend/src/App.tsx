@@ -1,16 +1,16 @@
 import "react";
 import { createHashRouter, RouterProvider } from "react-router-dom";
-import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
+import { ThemeProvider } from "@mui/material"
 
 import "./styles";
 
-import type { AppRouter } from "../../api/src/index";
 import { ListBills } from "./pages/ListBills/ListBills";
-import ErrorBoundary from "./components/ErrorBoundary";
+import ErrorBoundary from "./components/ErrorBoundary/ErrorBoundary";
 import { CreateBill } from "./pages/CreateBill/CreateBill";
 import { ROUTES } from "./routes";
-import { Page } from "./components/Page";
-import { createTheme, ThemeProvider } from "@mui/material";
+import { Page } from "./components/Page/Page";;
+import { ViewBill } from "./pages/ViewBill/ViewBill";
+import { useTheme } from "./styles";
 
 const router = createHashRouter([
   {
@@ -25,28 +25,14 @@ const router = createHashRouter([
     path: ROUTES.bills.create,
     element: <Page><CreateBill /></Page>
   },
+  {
+    path: ROUTES.bills.getById(":id"),
+    element: <Page><ViewBill /></Page>,
+  },
 ]);
 
-export const trpc = createTRPCProxyClient<AppRouter>({
-  links: [
-    httpBatchLink({
-      url: "http://localhost:8000",
-    }),
-  ],
-});
-
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: "#0b3954",
-    },
-    secondary: {
-      main: "#7768AE",
-    }
-  },
-})
-
 export function App() {
+  const theme = useTheme();
   return (
     <ThemeProvider theme={theme}>
       <ErrorBoundary>

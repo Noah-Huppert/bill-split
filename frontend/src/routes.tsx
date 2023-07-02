@@ -4,5 +4,6 @@ export const ROUTES = {
     apexList: "/",
     list: "/bills",
     create: "/bills/create",
+    getById: (id: string) => `/bills/${id}`,
   },
 };

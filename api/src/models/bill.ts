@@ -7,7 +7,7 @@ export interface IBill {
   /**
    * Unique identifier.
    */
-  id: Types.ObjectId;
+  _id: string;
 
   /**
    * Name of bill.
@@ -42,7 +42,7 @@ export interface ITag {
   /**
    * Unique ID.
    */
-  id: Types.ObjectId;
+  _id: string;
 
   /**
    * User facing title.
@@ -57,7 +57,7 @@ export interface ILineItem {
   /**
    * Unique ID.
    */
-  id: Types.ObjectId;
+  _id: string;
 
   /**
    * User facing title.
@@ -72,15 +72,15 @@ export interface ILineItem {
   /**
    * IDs of tags for item.
    */
-  tags: Types.ObjectId[];
+  tags: string[];
 
   /**
    * How much each user owes for this item.
    * Keys are user IDs, values are [0, 1] percentage split the user will pay.
    */
   usersSplit: {
-    id: Types.ObjectId;
-    userID: Types.ObjectId;
+    _id: string;
+    userID: string;
     proportion: number;
   }[];
 }
@@ -92,7 +92,7 @@ export interface IUser {
   /**
    * Unique ID.
    */
-  id: Types.ObjectId;
+  _id: string;
 
   /**
    * Name of user.
@@ -108,7 +108,7 @@ export interface IProportionalCharge {
   /**
    * Unique Id.
    */
-  id: Types.ObjectId;
+  _id: string;
 
   /**
    * User facing title.
@@ -134,25 +134,25 @@ const BillSchema = new Schema<IBill>({
   name: { type: String, required: true },
   users: [
     {
-      id: { type: Types.ObjectId, alias: "_id", required: true },
+      _id: { type: Types.ObjectId, required: true },
       name: { type: String, required: true },
     },
   ],
   tags: [
     {
-      id: { type: Types.ObjectId, alias: "_id", required: true },
+      _id: { type: Types.ObjectId, required: true },
       name: { type: String, required: true },
     },
   ],
   lineItems: [
     {
-      id: { type: Types.ObjectId, alias: "_id", required: true },
+      _id: { type: Types.ObjectId, required: true },
       name: { type: String, required: true },
       price: { type: Number, required: true },
       tags: [{ type: Types.ObjectId, required: true }],
       usersSplit: [
         {
-          id: { type: Types.ObjectId, alias: "_id", required: true },
+          _id: { type: Types.ObjectId, required: true },
           userID: { type: Types.ObjectId, required: true },
           proportion: { type: Number, required: true },
         },
@@ -161,7 +161,7 @@ const BillSchema = new Schema<IBill>({
   ],
   proportionalCharges: [
     {
-      id: { type: Types.ObjectId, alias: "_id", required: true },
+      _id: { type: Types.ObjectId, required: true },
       name: { type: String, required: true },
       filterTags: {
         type: [

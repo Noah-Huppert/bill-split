@@ -1,14 +1,15 @@
 import { useEffect, useState, useContext, useCallback } from "react";
 import KayakingIcon from '@mui/icons-material/Kayaking';
-import { Button, CircularProgress, List, ListItemButton, ListItemText } from "@mui/material";
+import { Button, List, ListItemButton, ListItemText } from "@mui/material";
 import AddBusinessIcon from '@mui/icons-material/AddBusiness';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
-import { trpc } from "../../App";
-import { ErrorReporter } from "../../components/ErrorBoundary";
+import { trpc } from "../../trpc";
+import { ErrorReporter } from "../../components/ErrorBoundary/ErrorBoundary";
 import { IBill } from "../../../../api/src/models/bill";
 import { ROUTES } from "../../routes";
 import "./ListBills.scss";
+import { Loading } from "../../components/Loading/Loading";
 
 export function ListBills() {
   return (
@@ -26,13 +27,16 @@ export function ListBills() {
 					</Button>
 				</Link>
 			</div>
-			<BillsList />
+
+			<div className="margin-top-1">
+				<BillsList />
+			</div>
 		</>
 	);
 }
 
 function BillsList() {
-	const [bills, setBills] = useState<ReturnType<trpc.billList.query>[]>([]);
+	const [bills, setBills] = useState<IBill[] | null>(null);
   const showError = useContext(ErrorReporter);
 
   const fetchBills = useCallback(async () => {
@@ -40,14 +44,14 @@ function BillsList() {
   }, [setBills]);
   useEffect(() => {
     fetchBills().catch((e) => showError({
-		userError: "Failed to get bills",
-		systemError: e,
-	}));
+			userError: "Failed to get bills",
+			systemError: e,
+		}));
   }, [fetchBills]);
 
 	if (!bills) {
 		return (
-			<CircularProgress />
+			<Loading />
 		);
 	}
 
@@ -61,9 +65,9 @@ function BillsList() {
 	}
 
 	return (
-		<List>
+		<List className="bills-list">
 		{bills.map(bill => (
-			<BillItem bill={bill} />
+			<BillItem key={bill._id} bill={bill} />
 		))}
 		</List>
 	)
@@ -74,8 +78,10 @@ function BillItem({
 }: {
 	readonly bill: IBill,
 }) {
+	const navigate = useNavigate();
+
 	return (
-		<ListItemButton>
+		<ListItemButton divider={true} onClick={() => navigate(ROUTES.bills.getById(bill._id))}>
 			<ListItemText primary={bill.name} secondary={`${bill.lineItems.length} item(s) between ${bill.users.length} people`} />
 		</ListItemButton>
 	)

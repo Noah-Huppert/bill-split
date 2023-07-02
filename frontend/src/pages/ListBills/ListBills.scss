@@ -1,3 +1,5 @@
+@import "../../index.scss";
+
 .bills-not-found {
   display: flex;
   flex-direction: column;
@@ -12,4 +14,9 @@
   .create-button {
     margin-left: 0.5rem;
   }
+}
+
+.bills-list {
+  box-shadow: 0.1rem 0.1rem 0.5rem $border;
+  padding: 0 !important;
 }
