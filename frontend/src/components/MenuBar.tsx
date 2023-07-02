@@ -3,14 +3,17 @@ import SavingsIcon from '@mui/icons-material/Savings';
 import styled from "styled-components";
 
 import { COLORS } from "../styles";
+import { Link } from "react-router-dom";
+import { ROUTES } from "../routes";
 
-const MenuDiv = styled.div`
+const MenuDiv = styled(Link)`
 background: ${COLORS.primary};
 color: ${COLORS.foreground};
 padding: 1rem;
 margin-bottom: 1rem;
 display: flex;
 align-items: center;
+text-decoration: none;
 `;
 
 const MenuIcon = styled(SavingsIcon)`
@@ -23,9 +26,9 @@ font-size: 1.5rem;
 
 export function MenuBar() {
   return (
-    <MenuDiv>
-      <MenuIcon fontSize="large" />
-      <MenuTitle>Bill Split</MenuTitle>
+    <MenuDiv to={ROUTES.apex}>
+        <MenuIcon fontSize="large" />
+        <MenuTitle>Bill Split</MenuTitle>
     </MenuDiv>
   )
 }

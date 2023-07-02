@@ -5,16 +5,24 @@ import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
 import "./styles";
 
 import type { AppRouter } from "../../api/src/index";
-import { Home } from "./pages/Home";
+import { ListBills } from "./pages/ListBills";
 import ErrorBoundary from "./components/ErrorBoundary";
-import Container from "@mui/material/Container";
-import { MenuBar } from "./components/MenuBar";
+import { CreateBill } from "./pages/CreateBill";
+import { ROUTES } from "./routes";
+import { Page } from "./components/Page";
 
 const router = createHashRouter([
   {
-    path: "/",
-    element: <Home />,
-    children: [],
+    path: ROUTES.bills.apexList,
+    element: <Page><ListBills /></Page>
+  },
+  {
+    path: ROUTES.bills.list,
+    element: <Page><ListBills /></Page>
+  },
+  {
+    path: ROUTES.bills.create,
+    element: <Page><CreateBill /></Page>
   },
 ]);
 
@@ -29,10 +37,8 @@ export const trpc = createTRPCProxyClient<AppRouter>({
 export function App() {
   return (
     <ErrorBoundary>
-      <MenuBar />
-      <Container>
+      
         <RouterProvider router={router}></RouterProvider>
-      </Container>
     </ErrorBoundary>
   );
 }

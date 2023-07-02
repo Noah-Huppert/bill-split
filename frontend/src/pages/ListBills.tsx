@@ -8,6 +8,8 @@ import { trpc } from "../App";
 import { ErrorReporter } from "../components/ErrorBoundary";
 import { IBill } from "../../../api/src/models/bill";
 import { COLORS } from "../styles";
+import { Link } from "react-router-dom";
+import { ROUTES } from "../routes";
 
 const NotFoundContainer = styled.div`
 display: flex;
@@ -19,7 +21,7 @@ const NotFoundMsg = styled.p`
 font-size: 2rem;
 `;
 
-const HomeHeader = styled.div`
+const Header = styled.div`
 display: flex;
 flex-direction: row;
 justify-content: space-between;
@@ -37,20 +39,22 @@ const CreateButtonText = styled.div`
 margin-left: 0.5rem;
 `;
 
-export function Home() {
+export function ListBills() {
   return (
 		<>
-			<HomeHeader>
+			<Header>
 				<Title>
 					Bills
 				</Title>
+				<Link to={ROUTES.bills.create}>
 				<CreateButton variant="contained">
 					<AddBusinessIcon fontSize="medium" />
 					<CreateButtonText>
 						New Bill
 					</CreateButtonText>
 				</CreateButton>
-			</HomeHeader>
+				</Link>
+			</Header>
 			<BillsList />
 		</>
 	);
