@@ -1,6 +1,6 @@
 import "react";
 import { createHashRouter, RouterProvider } from "react-router-dom";
-import { ThemeProvider } from "@mui/material";
+import { CssBaseline, ThemeProvider } from "@mui/material";
 
 import "./styles";
 
@@ -48,9 +48,11 @@ const router = createHashRouter([
 ]);
 
 export function App() {
-  const theme = useTheme();
+  const theme = useTheme()[0];
+
   return (
     <ThemeProvider theme={theme}>
+      <CssBaseline />
       <ErrorBoundary>
         <RouterProvider router={router}></RouterProvider>
       </ErrorBoundary>

@@ -8,22 +8,6 @@ $background: #fefffe;
 $foreground: #000000;
 $border: lighten($foreground, 80%);
 
-.background-primary {
-  background: $primary;
-}
-
-.background-secondary {
-  background: $secondary;
-}
-
-.color-foreground {
-  color: $foreground;
-}
-
-.color-background {
-  color: $background;
-}
-
 // Overrides
 body {
   padding: 0;
@@ -47,16 +31,11 @@ a {
   }
 }
 
-// Typography
-.font-title {
-  font-size: 1.5rem;
-}
-
-.font-hint {
-  font-size: 0.8rem;
-}
-
 // Padding & margin
+.padding-1 {
+  padding: 1rem;
+}
+
 .margin-bottom-1 {
   margin-bottom: 1rem;
 }

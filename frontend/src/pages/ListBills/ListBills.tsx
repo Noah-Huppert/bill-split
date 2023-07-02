@@ -1,6 +1,6 @@
 import { useEffect, useState, useContext, useCallback } from "react";
 import KayakingIcon from "@mui/icons-material/Kayaking";
-import { Button, List, ListItemButton, ListItemText } from "@mui/material";
+import { Box, Button, List, ListItemButton, ListItemText } from "@mui/material";
 import AddBusinessIcon from "@mui/icons-material/AddBusiness";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -69,11 +69,15 @@ function BillsList() {
   }
 
   return (
-    <List className="bills-list">
-      {bills.map((bill) => (
-        <BillItem key={bill._id} bill={bill} />
-      ))}
-    </List>
+		<Box sx={{
+			boxShadow: 3,
+		}}>
+			<List>
+				{bills.map((bill) => (
+					<BillItem key={bill._id} bill={bill} />
+				))}
+			</List>
+		</Box>
   );
 }
 

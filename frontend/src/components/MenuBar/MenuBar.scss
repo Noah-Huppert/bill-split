@@ -1,13 +1,14 @@
-@import "../../index.scss";
-
 .menu-bar {
-  padding: 1rem;
-  margin-bottom: 1rem;
   display: flex;
-  align-items: center;
-  text-decoration: none;
-  color: $background !important;
+  justify-content: space-between;
 
+  text-decoration: none;
+
+  .menu-bar-start {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
   .icon {
     margin-right: 1rem;
   }

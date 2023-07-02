@@ -4,15 +4,32 @@ import { Link } from "react-router-dom";
 
 import { ROUTES } from "../../routes";
 import "./MenuBar.scss";
+import { Box, Typography } from "@mui/material";
+import { DarkModeToggle } from "../DarkModeToggle/DarkModeToggle";
 
 export function MenuBar() {
   return (
-    <Link
-      to={ROUTES.apex}
-      className="background-primary color-background menu-bar"
+    <Box
+      sx={{
+        bgcolor: "primary.main",
+      }}
+      className="padding-1 margin-bottom-1 menu-bar"
     >
-      <SavingsIcon fontSize="large" className="icon" />
-      <div className="font-title">Bill Split</div>
-    </Link>
+      <Link to={ROUTES.apex} className="menu-bar-start">
+        <Box sx={{
+          color: "common.white",
+        }}>
+          <SavingsIcon fontSize="large" className="icon" />
+        </Box>
+
+        <Typography variant="h5" color="common.white">
+          Bill Split
+        </Typography>
+      </Link>
+
+      <div className="menu-bar-end">
+        <DarkModeToggle />
+      </div>
+    </Box>
   );
 }
