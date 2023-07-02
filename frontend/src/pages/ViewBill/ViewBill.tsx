@@ -29,24 +29,20 @@ export function ViewBill() {
   }, [setBill, setLoading]);
 
   useEffect(() => {
-    fetchBill().catch((e) => reportError({
-      userError: "Failed to get bill",
-      systemError: e,
-    }));
-  }, [fetchBill, reportError])
+    fetchBill().catch((e) =>
+      reportError({
+        userError: "Failed to get bill",
+        systemError: e,
+      })
+    );
+  }, [fetchBill, reportError]);
 
   if (loading) {
-    return (
-      <Loading />
-    )
+    return <Loading />;
   }
 
   if (!bill) {
-    return (
-      <div className="font-title">
-        Bill Not Found
-      </div>
-    );
+    return <div className="font-title">Bill Not Found</div>;
   }
 
   return (

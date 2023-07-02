@@ -1,5 +1,11 @@
 import { FormEvent, useState, useContext } from "react";
-import { Breadcrumbs, Button, Card, CardContent, TextField } from "@mui/material";
+import {
+  Breadcrumbs,
+  Button,
+  Card,
+  CardContent,
+  TextField,
+} from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 
 import { trpc } from "../../trpc";
@@ -29,7 +35,7 @@ export function CreateBill() {
       });
     }
   };
-  
+
   return (
     <>
       <Breadcrumbs>
@@ -40,9 +46,7 @@ export function CreateBill() {
       <div className="create-bill-container">
         <Card className="margin-top-1 create-bill-card">
           <CardContent>
-            <div className="font-title">
-              New Bill
-            </div>
+            <div className="font-title">New Bill</div>
 
             <div className="font-hint">
               Create a new bill. Split line items, tip, and tax.
@@ -66,5 +70,5 @@ export function CreateBill() {
         </Card>
       </div>
     </>
-  )
+  );
 }

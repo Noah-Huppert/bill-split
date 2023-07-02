@@ -23,7 +23,7 @@ interface Props {
 
 interface State {
   hasError: boolean;
-  nonFatalErrors: {[key: string]: string};
+  nonFatalErrors: { [key: string]: string };
 }
 
 /**
@@ -60,34 +60,38 @@ class ErrorBoundary extends Component<Props, State> {
 
       this.setState({
         nonFatalErrors: {
-            ...this.state.nonFatalErrors,
-            [uuid]: err.userError,
+          ...this.state.nonFatalErrors,
+          [uuid]: err.userError,
         },
       });
 
       setTimeout(() => {
         if (uuid in this.state.nonFatalErrors) {
-            const newErrs = this.state.nonFatalErrors;
-            delete this.state.nonFatalErrors[uuid];
-            this.setState({
-                nonFatalErrors: newErrs,
-            });
+          const newErrs = this.state.nonFatalErrors;
+          delete this.state.nonFatalErrors[uuid];
+          this.setState({
+            nonFatalErrors: newErrs,
+          });
         }
       }, 5000);
     };
 
     return (
       <ErrorReporter.Provider value={showErr}>
-        {Object.keys(this.state.nonFatalErrors).map(uuid => (
-            <Alert key={uuid} severity="error" onClose={() => {
-                const newErrs = this.state.nonFatalErrors;
-                delete this.state.nonFatalErrors[uuid];
-                this.setState({
-                    nonFatalErrors: newErrs,
-                });
-            }}>
-                {this.state.nonFatalErrors[uuid]}
-            </Alert>
+        {Object.keys(this.state.nonFatalErrors).map((uuid) => (
+          <Alert
+            key={uuid}
+            severity="error"
+            onClose={() => {
+              const newErrs = this.state.nonFatalErrors;
+              delete this.state.nonFatalErrors[uuid];
+              this.setState({
+                nonFatalErrors: newErrs,
+              });
+            }}
+          >
+            {this.state.nonFatalErrors[uuid]}
+          </Alert>
         ))}
         {this.props.children}
       </ErrorReporter.Provider>

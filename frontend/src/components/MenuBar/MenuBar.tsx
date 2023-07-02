@@ -1,5 +1,5 @@
 import "react";
-import SavingsIcon from '@mui/icons-material/Savings';
+import SavingsIcon from "@mui/icons-material/Savings";
 import { Link } from "react-router-dom";
 
 import { ROUTES } from "../../routes";
@@ -11,13 +11,8 @@ export function MenuBar() {
       to={ROUTES.apex}
       className="background-primary color-background menu-bar"
     >
-        <SavingsIcon
-          fontSize="large"
-          className="icon"
-        />
-        <div className="font-title">
-          Bill Split
-        </div>
+      <SavingsIcon fontSize="large" className="icon" />
+      <div className="font-title">Bill Split</div>
     </Link>
-  )
+  );
 }
