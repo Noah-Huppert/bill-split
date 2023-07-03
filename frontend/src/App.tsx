@@ -11,6 +11,7 @@ import { ROUTES } from "./routes";
 import { Page } from "./components/Page/Page";
 import { ViewBill } from "./pages/ViewBill/ViewBill";
 import { useTheme } from "./styles";
+import { Toaster } from "./components/Toaster/Toaster";
 
 const router = createHashRouter([
   {
@@ -54,7 +55,9 @@ export function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <ErrorBoundary>
-        <RouterProvider router={router}></RouterProvider>
+        <Toaster>
+          <RouterProvider router={router}></RouterProvider>
+        </Toaster>
       </ErrorBoundary>
     </ThemeProvider>
   );

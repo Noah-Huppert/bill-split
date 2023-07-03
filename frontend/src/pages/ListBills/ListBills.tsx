@@ -6,7 +6,7 @@ import AddBusinessIcon from "@mui/icons-material/AddBusiness";
 import { Link, useNavigate } from "react-router-dom";
 
 import { trpc } from "../../trpc";
-import { ErrorReporter } from "../../components/ErrorBoundary/ErrorBoundary";
+import { ToasterCtx } from "../../components/Toaster/Toaster";
 import { IBill } from "../../../../api/src/models/bill";
 import { ROUTES } from "../../routes";
 import "./ListBills.scss";
@@ -38,19 +38,22 @@ export function ListBills() {
 
 function BillsList() {
   const [bills, setBills] = useState<IBill[] | null>(null);
-  const showError = useContext(ErrorReporter);
+  const toast = useContext(ToasterCtx);
 
   const fetchBills = useCallback(async () => {
     setBills(await trpc.billList.query());
   }, [setBills]);
   useEffect(() => {
     fetchBills().catch((e) =>
-      showError({
-        userError: "Failed to get bills",
-        systemError: e,
+      toast({
+        _tag: "error",
+        error: {
+          userError: "Failed to get bills",
+          systemError: e,
+        },
       })
     );
-  }, [fetchBills]);
+  }, [toast, fetchBills]);
 
   if (!bills) {
     return <Loading />;

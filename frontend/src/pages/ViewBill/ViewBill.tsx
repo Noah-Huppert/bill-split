@@ -4,19 +4,22 @@ import { Link, useParams } from "react-router-dom";
 
 import { ROUTES } from "../../routes";
 import { trpc } from "../../trpc";
-import { ErrorReporter } from "../../components/ErrorBoundary/ErrorBoundary";
+import { ToasterCtx } from "../../components/Toaster/Toaster";
 import { Loading } from "../../components/Loading/Loading";
 import { IBill } from "../../../../api/src/models/bill";
 import { Images } from "../../components/Images/Images";
 
 export function ViewBill() {
   const { id } = useParams();
-  const reportError = useContext(ErrorReporter);
+  const toast = useContext(ToasterCtx);
 
   if (!id) {
-    reportError({
-      userError: "Invalid URL",
-      systemError: "id parameter is undefined",
+    toast({
+      _tag: "error",
+      error: {
+        userError: "Invalid URL",
+        systemError: "id parameter is undefined",
+      },
     });
     return;
   }

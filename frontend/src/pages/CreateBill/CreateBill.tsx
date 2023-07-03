@@ -11,12 +11,12 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 
 import { trpc } from "../../trpc";
-import { ErrorReporter } from "../../components/ErrorBoundary/ErrorBoundary";
+import { ToasterCtx } from "../../components/Toaster/Toaster";
 import "./CreateBill.scss";
 import { ROUTES } from "../../routes";
 
 export function CreateBill() {
-  const reportError = useContext(ErrorReporter);
+  const toast = useContext(ToasterCtx);
   const navigate = useNavigate();
 
   const [name, setName] = useState("");
@@ -31,9 +31,12 @@ export function CreateBill() {
 
       navigate(ROUTES.bills.getById(bill._id));
     } catch (e) {
-      reportError({
-        userError: "Failed to create bill",
-        systemError: String(e),
+      toast({
+        _tag: "error",
+        error: {
+          userError: "Failed to create bill",
+          systemError: String(e),
+        },
       });
     }
   };

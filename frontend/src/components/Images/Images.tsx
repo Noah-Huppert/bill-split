@@ -5,7 +5,6 @@ import ClearIcon from '@mui/icons-material/Clear';
 import { v4 as uuidv4 } from "uuid";
 
 import { IImage } from "../../../../api/src/models/bill";
-import { stat } from "fs";
 
 export function Images({
   images,
@@ -45,29 +44,39 @@ export function Images({
   );
 }
 
+/**
+ * Status of file being read.
+ */
 enum FileReadStatus {
   Pending = "pending",
   Processing = "processing",
   Done = "done",
 }
 
+/**
+ * Shows a file which was selected for upload and who's contents are being processed.
+ * Allows the file to be removed.
+ */
 function FileToUpload({
   name,
   fileReader,
   onRemove,
+  onDone,
 }: {
   readonly name: string,
   readonly fileReader: FileReader,
   readonly onRemove: () => void,
+  readonly onDone: () => void,
 }) {
   const [status, setStatus] = useState(FileReadStatus.Pending);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    
-
     fileReader.onloadstart = () => setStatus(FileReadStatus.Processing);
-    fileReader.onloadend = () => setStatus(FileReadStatus.Done);
+    fileReader.onloadend = () => {
+      setStatus(FileReadStatus.Done);
+      onDone();
+    };
     fileReader.onabort = () => {
       setError("Upload canceled");
     };
@@ -124,6 +133,9 @@ function FileToUpload({
   );
 }
 
+/**
+ * Form which allows multiple images to be uploaded.
+ */
 function UploadImage({
   onClose,
 }: {
@@ -132,10 +144,17 @@ function UploadImage({
   const [files, setFiles] = useState<{ [key: string]: {
     fileReader: FileReader,
     name: string,
+    done: boolean,
   }}>({});
 
   const onFileUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files === null) {
+      return;
+    }
+
+    const targetFiles = e.target.files;
+
+    if (Object.values(files).filter((file) => file.name === targetFiles[0].name).length > 0) {
       return;
     }
     
@@ -146,6 +165,7 @@ function UploadImage({
     filesCopy[uuid] = {
       fileReader: reader,
       name: e.target.files[0].name,
+      done: false,
     };
     reader.readAsArrayBuffer(e.target.files[0]);
       
@@ -160,7 +180,11 @@ function UploadImage({
         marginBottom: "1rem",
       }}
     >
-      <form>
+      <form
+        onSubmit={() => {
+
+        }}
+      >
           <Button
             component="label"
             sx={{
@@ -202,6 +226,11 @@ function UploadImage({
                   delete filesCopy[uuid];
                   setFiles(filesCopy);
                 }}
+                onDone={() => {
+                  const filesCopy = {...files};
+                  filesCopy[uuid].done = true;
+                  setFiles(filesCopy);
+                }}
               />
             ))}
           </Box>
@@ -230,6 +259,7 @@ function UploadImage({
             <Button
               type="submit"
               variant="contained"
+              disabled={Object.keys(files).length < 1 || Object.values(files).filter((file) => file.done === false).length > 0}
             >
               Upload
             </Button>
