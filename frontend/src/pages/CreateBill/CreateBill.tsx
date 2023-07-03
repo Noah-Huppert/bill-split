@@ -62,7 +62,7 @@ export function CreateBill() {
               />
 
               <div className="margin-top-2">
-                <Button color="secondary" variant="contained">
+                <Button color="secondary" variant="contained" type="submit">
                   Create
                 </Button>
               </div>

@@ -1,6 +1,7 @@
 import { useEffect, useState, useContext, useCallback } from "react";
 import KayakingIcon from "@mui/icons-material/Kayaking";
-import { Box, Button, List, ListItemButton, ListItemText, Typography } from "@mui/material";
+import { Box, Button, IconButton, List, ListItemButton, ListItemText, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
+import ListAltIcon from '@mui/icons-material/ListAlt';
 import AddBusinessIcon from "@mui/icons-material/AddBusiness";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -69,30 +70,50 @@ function BillsList() {
   }
 
   return (
-		<Box sx={{
-			boxShadow: 10,
-		}}>
-			<List>
-				{bills.map((bill) => (
-					<BillItem key={bill._id} bill={bill} />
-				))}
-			</List>
-		</Box>
+		<TableContainer component={Paper}>
+			<Table>
+				<TableHead>
+					<TableRow>
+						<TableCell>Name</TableCell>
+						<TableCell>Items</TableCell>
+						<TableCell>People</TableCell>
+						<TableCell width="10"></TableCell>
+					</TableRow>
+				</TableHead>	
+				<TableBody>
+					{bills.map((bill) => (
+						<BillItem key={bill._id} bill={bill} />
+					))}
+				</TableBody>
+			</Table>
+		</TableContainer>
   );
 }
 
 function BillItem({ bill }: { readonly bill: IBill }) {
   const navigate = useNavigate();
+	const onClick = () => navigate(ROUTES.bills.getById(bill._id));
 
   return (
-    <ListItemButton
-      divider={true}
-      onClick={() => navigate(ROUTES.bills.getById(bill._id))}
-    >
-      <ListItemText
-        primary={bill.name}
-        secondary={`${bill.lineItems.length} item(s) between ${bill.users.length} people`}
-      />
-    </ListItemButton>
+    <TableRow hover={true} onClick={onClick} sx={{
+			":hover": {
+				cursor: "pointer",
+			},
+		}}>
+			<TableCell>{bill.name}</TableCell>
+			<TableCell>{bill.lineItems.length}</TableCell>
+			<TableCell>{bill.users.length}</TableCell>
+			<TableCell>
+				<IconButton
+					onClick={onClick}>
+					<ListAltIcon fontSize="small" />
+					<Typography sx={{
+						marginLeft: "0.3rem",
+					}}>
+						View
+					</Typography>
+				</IconButton>
+			</TableCell>
+    </TableRow>
   );
 }
