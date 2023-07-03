@@ -15,6 +15,11 @@ export interface IBill {
   name: string;
 
   /**
+   * Images of receipt.
+   */
+  images: IImage[];
+
+  /**
    * Users which will split the items.
    */
   users: IUser[];
@@ -33,6 +38,26 @@ export interface IBill {
    * Costs based on a propotion of the line items.
    */
   proportionalCharges: IProportionalCharge[];
+}
+
+/**
+ * Image of receipt.
+ */
+export interface IImage {
+  /**
+   * Unique ID.
+   */
+  _id: string;
+
+  /**
+   * MIME type of image.
+   */
+  mimeType: string;
+
+  /**
+   * Base 64 encoded data of image.
+   */
+  base64Data: string;
 }
 
 /**
@@ -132,6 +157,13 @@ export interface IProportionalCharge {
  */
 const BillSchema = new Schema<IBill>({
   name: { type: String, required: true },
+  images: [
+    {
+      _id: { type: Types.ObjectId, required: true },
+      mimeType: { type: String, required: true },
+      base64Data: { type: String, required: true },
+    },
+  ],
   users: [
     {
       _id: { type: Types.ObjectId, required: true },
