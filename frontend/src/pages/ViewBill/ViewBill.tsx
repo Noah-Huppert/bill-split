@@ -1,5 +1,5 @@
 import { useState, useContext, useCallback, useEffect } from "react";
-import { Breadcrumbs, Typography } from "@mui/material";
+import { Breadcrumbs, Paper, Typography } from "@mui/material";
 import { Link, useParams } from "react-router-dom";
 
 import { ROUTES } from "../../routes";
@@ -7,6 +7,7 @@ import { trpc } from "../../trpc";
 import { ErrorReporter } from "../../components/ErrorBoundary/ErrorBoundary";
 import { Loading } from "../../components/Loading/Loading";
 import { IBill } from "../../../../api/src/models/bill";
+import { Images } from "../../components/Images/Images";
 
 export function ViewBill() {
   const { id } = useParams();
@@ -51,7 +52,8 @@ export function ViewBill() {
         <Link to={ROUTES.bills.list}>Bills</Link>
         <div>{bill.name}</div>
       </Breadcrumbs>
-      Hello view bill
+      
+      <Images images={bill.images} />
     </>
   );
 }

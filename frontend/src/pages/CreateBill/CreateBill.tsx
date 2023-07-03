@@ -4,6 +4,7 @@ import {
   Button,
   Card,
   CardContent,
+  Paper,
   TextField,
   Typography,
 } from "@mui/material";
@@ -45,7 +46,7 @@ export function CreateBill() {
       </Breadcrumbs>
 
       <div className="create-bill-container">
-        <Card className="margin-top-1 create-bill-card">
+        <Paper className="margin-top-1 create-bill-card">
           <CardContent>
             <Typography variant="h5">New Bill</Typography>
 
@@ -68,7 +69,7 @@ export function CreateBill() {
               </div>
             </form>
           </CardContent>
-        </Card>
+        </Paper>
       </div>
     </>
   );
