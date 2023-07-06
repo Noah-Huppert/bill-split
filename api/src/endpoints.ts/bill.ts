@@ -52,6 +52,7 @@ const billList = publicProcedure.query(async (): Promise<IBillSummary[]> => {
 
 /**
  * Get details of specific bill by ID.
+ * @prop id ID of bill
  * @returns Bill details (without images) or null if bill with ID is not found.
  */
 const billGet = publicProcedure
@@ -69,6 +70,7 @@ const billGet = publicProcedure
 /**
  * Get images attached to a bill.
  * Split into a separate endpoint in case images are large.
+ * @prop id ID of the bill
  * @returns List of images or null if bill with ID is not found.
  */
 const billGetImages = publicProcedure
@@ -90,6 +92,7 @@ const billGetImages = publicProcedure
 
 /**
  * Creates a new bill.
+ * @props name Name of the new bill
  * @returns Newly created bill (without images).
  */
 const billCreate = publicProcedure
@@ -112,9 +115,46 @@ const billCreate = publicProcedure
     return resp;
   });
 
+/**
+ * Add images to a bill.
+ * @prop id ID of bill
+ * @props images The images to upload
+ * @returns All images for the bill, including newly uploaded images. Returns null if bill with ID doesn't exist.
+ */
+const billUploadImages = publicProcedure
+  .input(
+    z.object({
+      id: z.string(),
+      images: z.array(z.object({
+        mimeType: z.string(),
+        base64Data: z.string(),
+      })),
+    })
+  )
+  .mutation(async (opts): Promise<IImage[] | null> => {
+    const newBill = await Bill.findOneAndUpdate({
+      _id: opts.input.id,
+    }, {
+      $push: {
+        images: {
+          $each: opts.input.images,
+        },
+      },
+    }, {
+      new: true,
+    });
+
+    if (newBill === undefined || newBill === null) {
+      return null;
+    }
+
+    return newBill.images;
+  });
+
 export const endpoints = {
   billList,
   billGet,
   billGetImages,
   billCreate,
+  billUploadImages,
 };
