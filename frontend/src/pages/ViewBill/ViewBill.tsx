@@ -9,10 +9,7 @@ import { IImage } from "../../../../api/src/models/bill";
 import { ImageUploadDetails, Images } from "../../components/Images/Images";
 import { IBillWithoutImages } from "../../../../api/src/endpoints.ts/bill";
 import {
-  Loadable,
-  isLoaded,
   isLoading,
-  newLoaded,
   newLoading,
 } from "../../lib/loadable";
 import {
@@ -76,11 +73,17 @@ export function ViewBill() {
   }, [fetchBillImages, toast]);
 
   const onImageUpload = async (images: ImageUploadDetails[]): Promise<void> => {
-    const newImages = await trpc.billUploadImages.mutate({
-      id,
-      images,
-    });
-    setBillImages(newLoadedOrNotFound(newImages));
+    setBillImages(newLoadedOrNotFound(await trpc.billUploadImages.mutate({
+      id: id,
+      images: images,
+    })));
+  };
+
+  const onImageDelete = async (imageID: string): Promise<void> => {
+    setBillImages(newLoadedOrNotFound(await trpc.billDeleteImage.mutate({
+      billID: id,
+      imageID: imageID,
+    })));
   };
 
   if (isNotFound(bill) || isNotFound(billImages)) {
@@ -98,7 +101,7 @@ export function ViewBill() {
         {isLoading(bill) ? "..." : <div>{bill.data.name}</div>}
       </Breadcrumbs>
 
-      <Images onUpload={onImageUpload} images={billImages} />
+      <Images onUpload={onImageUpload} onDelete={onImageDelete} images={billImages} />
     </>
   );
 }

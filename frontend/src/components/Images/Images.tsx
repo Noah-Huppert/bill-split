@@ -6,18 +6,18 @@ import {
   ReactNode,
   ReactElement,
   FunctionComponent,
+  useCallback,
 } from "react";
 import {
   Box,
   Button,
   IconButton,
-  ImageList,
-  ImageListItem,
   LinearProgress,
   Paper,
   Typography,
 } from "@mui/material";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
+import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import ClearIcon from "@mui/icons-material/Clear";
 import { v4 as uuidv4 } from "uuid";
 
@@ -32,41 +32,11 @@ import { Loading } from "../Loading/Loading";
 export function Images({
   images,
   onUpload,
+  onDelete,
 }: {
   readonly images: Loadable<IImage[]>,
   readonly onUpload: (images: ImageUploadDetails[]) => Promise<void>,
-}) {
-  return (
-    <Paper
-      sx={{
-        paddingTop: "0.5rem",
-        paddingLeft: "1rem",
-        paddingRight: "1rem",
-      }}
-    >
-      <Typography
-        variant="h6"
-        sx={{
-          marginBottom: "1rem",
-        }}
-      >
-        Images
-      </Typography>
-
-      {isLoading(images) ? <Loading /> : <ImagesContent onUpload={onUpload} images={images.data} />}
-    </Paper>
-  );
-}
-
-/**
- * Content to display images inside of <Images /> container element.
- */
-function ImagesContent({
-  images,
-  onUpload,
-}: {
-  readonly images: IImage[],
-  readonly onUpload: (images: ImageUploadDetails[]) => Promise<void>,
+  readonly onDelete: (imageID: string) => Promise<void>,
 }) {
   const [uploadMenuOpen, setUploadMenuOpen] = useState(false);
 
@@ -80,6 +50,51 @@ function ImagesContent({
         />
       )}
 
+      <Paper
+        sx={{
+          paddingTop: "0.5rem",
+          paddingLeft: "1rem",
+          paddingRight: "1rem",
+        }}
+      >
+        <Typography
+          variant="h6"
+          sx={{
+            marginBottom: "1rem",
+          }}
+        >
+          Images
+        </Typography>
+
+        {isLoading(images) ? <Loading /> : (
+          <ImagesContent
+            images={images.data}
+            setUploadMenuOpen={(open: boolean) => setUploadMenuOpen(open)}
+            onUpload={onUpload}
+            onDelete={onDelete}
+          />
+        )}
+      </Paper>
+    </>
+  );
+}
+
+/**
+ * Content to display images inside of <Images /> container element.
+ */
+function ImagesContent({
+  images,
+  setUploadMenuOpen,
+  onUpload,
+  onDelete,
+}: {
+  readonly images: IImage[],
+  readonly setUploadMenuOpen: (open: boolean) => void,
+  readonly onUpload: (images: ImageUploadDetails[]) => Promise<void>,
+  readonly onDelete: (imageID: string) => Promise<void>,
+}) {
+  return (
+    <>
       {images.length > 0 ? (
         <IconButton onClick={() => setUploadMenuOpen(true)}>
           <AddPhotoAlternateIcon />
@@ -94,14 +109,53 @@ function ImagesContent({
         />
       )}
 
-      <ImageList>
-        {images.map((image) => (
-          <ImageListItem key={image._id}>
-            <img src={`data:${image.mimeType};base64, ${image.base64Data}`} />
-          </ImageListItem>
-        ))}
-      </ImageList>
+      {images.map((image) => (
+        <Image key={image._id} image={image} onDelete={onDelete} />
+      ))}
     </>
+  );
+}
+
+/**
+ * Display single image.
+ * @prop image To display
+ * @prop onDelete Called with image's ID when delete image button clicked. Errors thrown in this function are shown as toasts.
+ */
+function Image({
+  image,
+  onDelete,
+}: {
+  readonly image: IImage,
+  readonly onDelete: (imageID: string) => Promise<void>,
+}) {
+  const toast = useContext(ToasterCtx);
+
+  const handleDeleteClick = async () => {
+    // Confirm user wants to delete image
+    if (confirm("Delete image?") === false) {
+      return;
+    }
+
+    try {
+      await onDelete(image._id);
+    } catch (e) {
+      toast({
+        _tag: "error",
+        error: {
+          userError: "Failed to delete image",
+          systemError: `${e}`,
+        },
+      });
+    }
+  };
+
+  return (
+    <Box>
+      <IconButton onClick={handleDeleteClick}>
+        <HighlightOffIcon />
+      </IconButton>
+      <img src={`data:${image.mimeType};base64, ${image.base64Data}`} />
+    </Box>
   );
 }
 
@@ -211,6 +265,12 @@ export interface ImageUploadDetails {
 }
 
 /**
+ * Pattern matching the base64 read result of a file from FileReader.
+ * Match group 1 is the MIME type.
+ */
+const FILE_BASE64_READ_PATTERN = /^data:(.*\/.*);base64.*/;
+
+/**
  * Form which allows multiple images to be uploaded.
  * @prop onClose Handler run when the close button is clicked
  * @prop onUpload Handler run which does the act of uploading the images, errors thrown will be shown as toasts. Argument is an array of base64 content with the content type at the beginning, as the <img /> element expects
@@ -237,7 +297,6 @@ function UploadImage({
   const [files, setFiles] = useState<{
     [key: string]: {
       fileReader: FileReader;
-      mimeType: string;
       name: string;
       done: boolean;
     };
@@ -272,7 +331,6 @@ function UploadImage({
 
     filesCopy[uuid] = {
       fileReader: reader,
-      mimeType: targetFiles[0].type,
       name: targetFiles[0].name,
       done: false,
     };
@@ -289,7 +347,7 @@ function UploadImage({
       let badFiles: {
         uuid: string,
         name: string,
-        result: any,
+        systemError: string,
       }[] = [];
       let uploadFiles: {
         mimeType: string,
@@ -304,26 +362,50 @@ function UploadImage({
           badFiles.push({
             uuid: uuid,
             name: file.name,
-            result: file.fileReader.result,
+            systemError: `File '${uuid}' did not have its contents read as a string (is null=${file.fileReader.result === null}, typeof=${typeof file.fileReader.result})`,
           });
           continue;
         }
 
         // Put together file to upload
+        const mimeDataPart = file.fileReader.result.substring(0, 100);
+        const mimeMatch = mimeDataPart.match(FILE_BASE64_READ_PATTERN);
+        if (mimeMatch === null) {
+          badFiles.push({
+            uuid: uuid,
+            name: file.name,
+            systemError: `File '${uuid}' did not have a FileReader result which matched the expected Regex pattern, result[0:100]='${mimeDataPart}'`,
+          });
+          continue;
+        }
+
+        // Can't use Regex to get the data portion because data can be too big and causes browser crash
+        const base64DataParts = file.fileReader.result.split(";base64,");
+        if (base64DataParts.length !== 2) {
+          badFiles.push({
+            uuid: uuid,
+            name: file.name,
+            systemError: `File '${uuid}' did not have a FileReader result which matched the expected split pattern, result[0:100]='${mimeDataPart}'`,
+          });
+          continue;
+        }
+
         uploadFiles.push({
-          mimeType: file.mimeType,
-          base64Data: file.fileReader.result,
+          mimeType: mimeMatch[1],
+          base64Data: base64DataParts[1],
         });
       }
       
       if (badFiles.length > 0) {
+        console.error(badFiles)
         toast({
           _tag: "error",
           error: {
             userError: `Failed to prepare file(s) for upload: ${badFiles.map((file) => file.name).join(", ")}`,
-            systemError: `FileReader(s) result field was not a string: ${JSON.stringify(badFiles)}`,
+            systemError: "",//`${badFiles}`,
           },
         });
+        setIsUploading(false);
         return;
       }
 
@@ -340,6 +422,8 @@ function UploadImage({
         },
       });
     }
+
+    onClose();
   };
 
   const ParentComponent = parentComponent;
@@ -392,8 +476,8 @@ function UploadImage({
           ))}
         </Box>
 
-        {alwaysShowButtons ||
-          (Object.keys(files).length > 0 && (
+        {(alwaysShowButtons ||
+          Object.keys(files).length > 0) && (
             <Box
               sx={{
                 marginTop: "1rem",
@@ -431,7 +515,7 @@ function UploadImage({
                 Upload
               </Button>
             </Box>
-          ))}
+          )}
       </form>
     </ParentComponent>
   );
