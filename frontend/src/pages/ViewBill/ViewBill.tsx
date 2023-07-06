@@ -6,7 +6,7 @@ import { ROUTES } from "../../routes";
 import { trpc } from "../../trpc";
 import { ToasterCtx } from "../../components/Toaster/Toaster";
 import { IImage } from "../../../../api/src/models/bill";
-import { Images } from "../../components/Images/Images";
+import { ImageUploadDetails, Images } from "../../components/Images/Images";
 import { IBillWithoutImages } from "../../../../api/src/endpoints.ts/bill";
 import {
   Loadable,
@@ -75,6 +75,14 @@ export function ViewBill() {
     );
   }, [fetchBillImages, toast]);
 
+  const onImageUpload = async (images: ImageUploadDetails[]): Promise<void> => {
+    const newImages = await trpc.billUploadImages.mutate({
+      id,
+      images,
+    });
+    setBillImages(newLoadedOrNotFound(newImages));
+  };
+
   if (isNotFound(bill) || isNotFound(billImages)) {
     return <Typography variant="h5">Bill Not Found</Typography>;
   }
@@ -90,7 +98,7 @@ export function ViewBill() {
         {isLoading(bill) ? "..." : <div>{bill.data.name}</div>}
       </Breadcrumbs>
 
-      <Images images={billImages} />
+      <Images onUpload={onImageUpload} images={billImages} />
     </>
   );
 }

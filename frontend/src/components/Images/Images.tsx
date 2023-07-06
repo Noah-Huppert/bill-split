@@ -1,4 +1,12 @@
-import { ChangeEvent, useContext, useEffect, useState, ReactNode, ReactElement, FunctionComponent } from "react";
+import {
+  ChangeEvent,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+  ReactElement,
+  FunctionComponent,
+} from "react";
 import {
   Box,
   Button,
@@ -21,7 +29,13 @@ import { Loading } from "../Loading/Loading";
 /**
  * Displays images for a bill.
  */
-export function Images({ images }: { readonly images: Loadable<IImage[]> }) {
+export function Images({
+  images,
+  onUpload,
+}: {
+  readonly images: Loadable<IImage[]>,
+  readonly onUpload: (images: ImageUploadDetails[]) => Promise<void>,
+}) {
   return (
     <Paper
       sx={{
@@ -35,13 +49,11 @@ export function Images({ images }: { readonly images: Loadable<IImage[]> }) {
         sx={{
           marginBottom: "1rem",
         }}
-      >Images</Typography>
+      >
+        Images
+      </Typography>
 
-      {isLoading(images) ? (
-        <Loading />
-      ) : (
-        <ImagesContent images={images.data} />
-      )}
+      {isLoading(images) ? <Loading /> : <ImagesContent onUpload={onUpload} images={images.data} />}
     </Paper>
   );
 }
@@ -51,8 +63,10 @@ export function Images({ images }: { readonly images: Loadable<IImage[]> }) {
  */
 function ImagesContent({
   images,
+  onUpload,
 }: {
   readonly images: IImage[],
+  readonly onUpload: (images: ImageUploadDetails[]) => Promise<void>,
 }) {
   const [uploadMenuOpen, setUploadMenuOpen] = useState(false);
 
@@ -61,6 +75,7 @@ function ImagesContent({
       {uploadMenuOpen && (
         <UploadImage
           onClose={() => setUploadMenuOpen(false)}
+          onUpload={onUpload}
           alwaysShowButtons={true}
         />
       )}
@@ -71,13 +86,14 @@ function ImagesContent({
           <Typography>Add Photos</Typography>
         </IconButton>
       ) : (
-        <UploadImage
-          parentComponent={Box}
+        <UploadImage          
           onClose={() => setUploadMenuOpen(false)}
+          onUpload={onUpload}
+          parentComponent={Box}
           showCloseButton={false}
         />
       )}
-      
+
       <ImageList>
         {images.map((image) => (
           <ImageListItem key={image._id}>
@@ -86,7 +102,7 @@ function ImagesContent({
         ))}
       </ImageList>
     </>
-  )
+  );
 }
 
 /**
@@ -128,6 +144,7 @@ function FileToUpload({
     fileReader.onerror = (e) => {
       setError(`Upload failed`);
       console.error(`File upload failed: ${e}`);
+      onRemove();
     };
   }, [setStatus, fileReader]);
 
@@ -179,29 +196,55 @@ function FileToUpload({
 }
 
 /**
+ * Details about an image to upload.
+ */
+export interface ImageUploadDetails {
+  /**
+   * MIME type of image.
+   */
+  readonly mimeType: string;
+
+  /**
+   * Base64 encoded data.
+   */
+  readonly base64Data: string;
+}
+
+/**
  * Form which allows multiple images to be uploaded.
+ * @prop onClose Handler run when the close button is clicked
+ * @prop onUpload Handler run which does the act of uploading the images, errors thrown will be shown as toasts. Argument is an array of base64 content with the content type at the beginning, as the <img /> element expects
+ * @prop parentComponent Is the component in which the whole component's contents will be wrapped
+ * @prop alwaysShowButtons If true then the buttons will always show even if no images are selected
+ * @prop showCloseButton If true then the close button will be shown
  */
 function UploadImage({
-  parentComponent = DefaultUploadImageParent,
   onClose,
+  onUpload,
+  parentComponent = DefaultUploadImageParent,
   alwaysShowButtons = false,
   showCloseButton = true,
 }: {
-  readonly parentComponent?: FunctionComponent<{ readonly children: ReactElement }>,
-  readonly onClose: () => void,
-  readonly alwaysShowButtons?: boolean,
-  readonly showCloseButton?: boolean,
+  readonly onClose: () => void;
+  readonly onUpload: (images: ImageUploadDetails[]) => Promise<void>;
+  readonly parentComponent?: FunctionComponent<{
+    readonly children: ReactElement;
+  }>;
+  readonly alwaysShowButtons?: boolean;
+  readonly showCloseButton?: boolean;
 }) {
   const toast = useContext(ToasterCtx);
   const [files, setFiles] = useState<{
     [key: string]: {
       fileReader: FileReader;
+      mimeType: string;
       name: string;
       done: boolean;
     };
   }>({});
+  const [isUploading, setIsUploading] = useState(false);
 
-  const onFileUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+  const onFileAdded = async (e: ChangeEvent<HTMLInputElement>) => {
     // Check file was selected
     if (e.target.files === null || e.target.files.length < 1) {
       return;
@@ -229,19 +272,81 @@ function UploadImage({
 
     filesCopy[uuid] = {
       fileReader: reader,
-      name: e.target.files[0].name,
+      mimeType: targetFiles[0].type,
+      name: targetFiles[0].name,
       done: false,
     };
-    reader.readAsArrayBuffer(e.target.files[0]);
+    reader.readAsDataURL(e.target.files[0]);
 
     setFiles(filesCopy);
+  };
+
+  const onFormSubmit = async () => {
+    try {
+      setIsUploading(true);
+
+      // Get file contents from FileReaders
+      let badFiles: {
+        uuid: string,
+        name: string,
+        result: any,
+      }[] = [];
+      let uploadFiles: {
+        mimeType: string,
+        base64Data: string,
+      }[] = [];
+
+      for (const uuid of Object.keys(files)) {
+        const file = files[uuid];
+
+        // Check if result is as expected
+        if (file.fileReader.result === null || typeof file.fileReader.result !== "string") {
+          badFiles.push({
+            uuid: uuid,
+            name: file.name,
+            result: file.fileReader.result,
+          });
+          continue;
+        }
+
+        // Put together file to upload
+        uploadFiles.push({
+          mimeType: file.mimeType,
+          base64Data: file.fileReader.result,
+        });
+      }
+      
+      if (badFiles.length > 0) {
+        toast({
+          _tag: "error",
+          error: {
+            userError: `Failed to prepare file(s) for upload: ${badFiles.map((file) => file.name).join(", ")}`,
+            systemError: `FileReader(s) result field was not a string: ${JSON.stringify(badFiles)}`,
+          },
+        });
+        return;
+      }
+
+      // Call upload handler
+      await onUpload(uploadFiles);
+      setIsUploading(false);
+    } catch (e) {
+      setIsUploading(false);
+      toast({
+        _tag: "error",
+        error: {
+          userError: "Failed to upload file(s)",
+          systemError: `${e}`,
+        },
+      });
+    }
   };
 
   const ParentComponent = parentComponent;
 
   return (
     <ParentComponent>
-      <form onSubmit={() => {}}>
+      <form onSubmit={onFormSubmit}>
         <Button
           component="label"
           sx={{
@@ -255,7 +360,7 @@ function UploadImage({
             color: "text.primary",
           }}
         >
-          <input onChange={onFileUpload} type="file" accept="image/*" hidden />
+          <input onChange={onFileAdded} type="file" accept="image/*" hidden />
           <AddPhotoAlternateIcon fontSize="large" />
           <Typography
             variant="h6"
@@ -287,43 +392,46 @@ function UploadImage({
           ))}
         </Box>
 
-        {alwaysShowButtons || Object.keys(files).length > 0 && (
-          <Box
-            sx={{
-              marginTop: "1rem",
-              display: "flex",
-              justifyContent: "space-between",
-            }}
-          >
-            {showCloseButton && (
-              <Button
-                variant="outlined"
-                sx={{
-                  marginRight: "1rem",
-                  color: "text.primary",
-                  borderColor: "text.primary",
-                  ":hover": {
-                    borderColor: "text.primary",
-                  },
-                }}
-                onClick={onClose}
-              >
-                Close
-              </Button>
-            )}
-            <Button
-              type="submit"
-              variant="contained"
-              disabled={
-                Object.keys(files).length == 0 ||
-                Object.values(files).filter((file) => file.done === false)
-                  .length > 0
-              }
+        {alwaysShowButtons ||
+          (Object.keys(files).length > 0 && (
+            <Box
+              sx={{
+                marginTop: "1rem",
+                display: "flex",
+                justifyContent: "space-between",
+              }}
             >
-              Upload
-            </Button>
-          </Box>
-        )}
+              {showCloseButton && (
+                <Button
+                  variant="outlined"
+                  sx={{
+                    marginRight: "1rem",
+                    color: "text.primary",
+                    borderColor: "text.primary",
+                    ":hover": {
+                      borderColor: "text.primary",
+                    },
+                  }}
+                  onClick={onClose}
+                >
+                  Close
+                </Button>
+              )}
+              <Button
+                type="submit"
+                variant="contained"
+                disabled={
+                  isUploading ||
+                  Object.keys(files).length == 0 ||
+                  Object.values(files).filter((file) => file.done === false)
+                    .length > 0
+                }
+              >
+                {isUploading && <Loading />}
+                Upload
+              </Button>
+            </Box>
+          ))}
       </form>
     </ParentComponent>
   );
@@ -335,7 +443,7 @@ function UploadImage({
 function DefaultUploadImageParent({
   children,
 }: {
-  readonly children: ReactNode,
+  readonly children: ReactNode;
 }) {
   return (
     <Paper
