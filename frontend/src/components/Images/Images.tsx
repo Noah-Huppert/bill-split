@@ -1,4 +1,4 @@
-import { ChangeEvent, useContext, useEffect, useState } from "react";
+import { ChangeEvent, useContext, useEffect, useState, ReactNode, ReactElement, FunctionComponent } from "react";
 import {
   Box,
   Button,
@@ -18,12 +18,43 @@ import { ToasterCtx } from "../Toaster/Toaster";
 import { Loadable, isLoading } from "../../lib/loadable";
 import { Loading } from "../Loading/Loading";
 
+/**
+ * Displays images for a bill.
+ */
 export function Images({ images }: { readonly images: Loadable<IImage[]> }) {
-  const [uploadMenuOpen, setUploadMenuOpen] = useState(false);
+  return (
+    <Paper
+      sx={{
+        paddingTop: "0.5rem",
+        paddingLeft: "1rem",
+        paddingRight: "1rem",
+      }}
+    >
+      <Typography
+        variant="h6"
+        sx={{
+          marginBottom: "1rem",
+        }}
+      >Images</Typography>
 
-  if (isLoading(images)) {
-    return <Loading />;
-  }
+      {isLoading(images) ? (
+        <Loading />
+      ) : (
+        <ImagesContent images={images.data} />
+      )}
+    </Paper>
+  );
+}
+
+/**
+ * Content to display images inside of <Images /> container element.
+ */
+function ImagesContent({
+  images,
+}: {
+  readonly images: IImage[],
+}) {
+  const [uploadMenuOpen, setUploadMenuOpen] = useState(false);
 
   return (
     <>
@@ -31,23 +62,24 @@ export function Images({ images }: { readonly images: Loadable<IImage[]> }) {
         <UploadImage onClose={() => setUploadMenuOpen(false)} />
       )}
 
-      <Paper>
-        <Typography variant="h6">Images</Typography>
-
+      {images.length > 0 ? (
         <IconButton onClick={() => setUploadMenuOpen(true)}>
           <AddPhotoAlternateIcon />
           <Typography>Add Photos</Typography>
         </IconButton>
-        <ImageList>
-          {images.data.map((image) => (
-            <ImageListItem key={image._id}>
-              <img src={`data:${image.mimeType};base64, ${image.base64Data}`} />
-            </ImageListItem>
-          ))}
-        </ImageList>
-      </Paper>
+      ) : (
+        <UploadImage parentComponent={Box} onClose={() => setUploadMenuOpen(false)} />
+      )}
+      
+      <ImageList>
+        {images.map((image) => (
+          <ImageListItem key={image._id}>
+            <img src={`data:${image.mimeType};base64, ${image.base64Data}`} />
+          </ImageListItem>
+        ))}
+      </ImageList>
     </>
-  );
+  )
 }
 
 /**
@@ -142,7 +174,13 @@ function FileToUpload({
 /**
  * Form which allows multiple images to be uploaded.
  */
-function UploadImage({ onClose }: { readonly onClose: () => void }) {
+function UploadImage({
+  parentComponent = DefaultUploadImageParent,
+  onClose,
+}: {
+  readonly parentComponent?: FunctionComponent<{ readonly children: ReactElement }>,
+   readonly onClose: () => void,
+}) {
   const toast = useContext(ToasterCtx);
   const [files, setFiles] = useState<{
     [key: string]: {
@@ -167,7 +205,8 @@ function UploadImage({ onClose }: { readonly onClose: () => void }) {
     ) {
       toast({
         _tag: "info",
-        message: `File '${targetFiles[0].name} already added for upload`,
+        message: `File '${targetFiles[0].name}'
+         is already added for upload`,
       });
       return;
     }
@@ -187,14 +226,10 @@ function UploadImage({ onClose }: { readonly onClose: () => void }) {
     setFiles(filesCopy);
   };
 
+  const ParentComponent = parentComponent;
+
   return (
-    <Paper
-      sx={{
-        display: "inline-block",
-        padding: "1rem",
-        marginBottom: "1rem",
-      }}
-    >
+    <ParentComponent>
       <form onSubmit={() => {}}>
         <Button
           component="label"
@@ -217,7 +252,7 @@ function UploadImage({ onClose }: { readonly onClose: () => void }) {
               marginTop: "0.5rem",
             }}
           >
-            Upload Image
+            Upload Images
           </Typography>
         </Button>
 
@@ -241,40 +276,62 @@ function UploadImage({ onClose }: { readonly onClose: () => void }) {
           ))}
         </Box>
 
-        <Box
-          sx={{
-            marginTop: "1rem",
-            display: "flex",
-            justifyContent: "space-between",
-          }}
-        >
-          <Button
-            variant="outlined"
+        {Object.keys(files).length > 0 && (
+          <Box
             sx={{
-              marginRight: "1rem",
-              color: "text.primary",
-              borderColor: "text.primary",
-              ":hover": {
-                borderColor: "text.primary",
-              },
+              marginTop: "1rem",
+              display: "flex",
+              justifyContent: "space-between",
             }}
-            onClick={onClose}
           >
-            Close
-          </Button>
-          <Button
-            type="submit"
-            variant="contained"
-            disabled={
-              Object.keys(files).length < 1 ||
-              Object.values(files).filter((file) => file.done === false)
-                .length > 0
-            }
-          >
-            Upload
-          </Button>
-        </Box>
+            <Button
+              variant="outlined"
+              sx={{
+                marginRight: "1rem",
+                color: "text.primary",
+                borderColor: "text.primary",
+                ":hover": {
+                  borderColor: "text.primary",
+                },
+              }}
+              onClick={onClose}
+            >
+              Close
+            </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={
+                Object.values(files).filter((file) => file.done === false)
+                  .length > 0
+              }
+            >
+              Upload
+            </Button>
+          </Box>
+        )}
       </form>
+    </ParentComponent>
+  );
+}
+
+/**
+ * Default value for UploadImage parentComponent property.
+ */
+function DefaultUploadImageParent({
+  children,
+}: {
+  readonly children: ReactNode,
+}) {
+  return (
+    <Paper
+      sx={{
+        display: "inline-block",
+        padding: "1rem",
+        marginBottom: "1rem",
+      }}
+    >
+      {children}
     </Paper>
   );
 }
