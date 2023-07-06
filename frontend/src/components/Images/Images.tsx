@@ -59,7 +59,10 @@ function ImagesContent({
   return (
     <>
       {uploadMenuOpen && (
-        <UploadImage onClose={() => setUploadMenuOpen(false)} />
+        <UploadImage
+          onClose={() => setUploadMenuOpen(false)}
+          alwaysShowButtons={true}
+        />
       )}
 
       {images.length > 0 ? (
@@ -68,7 +71,11 @@ function ImagesContent({
           <Typography>Add Photos</Typography>
         </IconButton>
       ) : (
-        <UploadImage parentComponent={Box} onClose={() => setUploadMenuOpen(false)} />
+        <UploadImage
+          parentComponent={Box}
+          onClose={() => setUploadMenuOpen(false)}
+          showCloseButton={false}
+        />
       )}
       
       <ImageList>
@@ -177,9 +184,13 @@ function FileToUpload({
 function UploadImage({
   parentComponent = DefaultUploadImageParent,
   onClose,
+  alwaysShowButtons = false,
+  showCloseButton = true,
 }: {
   readonly parentComponent?: FunctionComponent<{ readonly children: ReactElement }>,
-   readonly onClose: () => void,
+  readonly onClose: () => void,
+  readonly alwaysShowButtons?: boolean,
+  readonly showCloseButton?: boolean,
 }) {
   const toast = useContext(ToasterCtx);
   const [files, setFiles] = useState<{
@@ -276,7 +287,7 @@ function UploadImage({
           ))}
         </Box>
 
-        {Object.keys(files).length > 0 && (
+        {alwaysShowButtons || Object.keys(files).length > 0 && (
           <Box
             sx={{
               marginTop: "1rem",
@@ -284,24 +295,27 @@ function UploadImage({
               justifyContent: "space-between",
             }}
           >
-            <Button
-              variant="outlined"
-              sx={{
-                marginRight: "1rem",
-                color: "text.primary",
-                borderColor: "text.primary",
-                ":hover": {
+            {showCloseButton && (
+              <Button
+                variant="outlined"
+                sx={{
+                  marginRight: "1rem",
+                  color: "text.primary",
                   borderColor: "text.primary",
-                },
-              }}
-              onClick={onClose}
-            >
-              Close
-            </Button>
+                  ":hover": {
+                    borderColor: "text.primary",
+                  },
+                }}
+                onClick={onClose}
+              >
+                Close
+              </Button>
+            )}
             <Button
               type="submit"
               variant="contained"
               disabled={
+                Object.keys(files).length == 0 ||
                 Object.values(files).filter((file) => file.done === false)
                   .length > 0
               }

@@ -81,7 +81,11 @@ export function ViewBill() {
 
   return (
     <>
-      <Breadcrumbs>
+      <Breadcrumbs
+        sx={{
+          marginBottom: "1rem",
+        }}
+      >
         <Link to={ROUTES.bills.list}>Bills</Link>
         {isLoading(bill) ? "..." : <div>{bill.data.name}</div>}
       </Breadcrumbs>
