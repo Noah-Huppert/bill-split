@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { publicProcedure } from "../trpc";
 import { Bill, IBill, IImage } from "../models/bill";
+import { Types } from "mongoose";
 
 /**
  * Summary of a bill.
@@ -80,14 +81,14 @@ const billGetImages = publicProcedure
     })
   )
   .query(async (opts): Promise<IImage[] | null> => {
-    const images = await Bill.findById(opts.input.id, {
+    const bill = await Bill.findById(opts.input.id, {
       images: true,
     });
-    if (images === null) {
+    if (bill === null) {
       return null;
     }
 
-    return images.images;
+    return bill.images;
   });
 
 /**
