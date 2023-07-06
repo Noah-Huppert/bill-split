@@ -103,7 +103,7 @@ const billCreate = publicProcedure
     })
   )
   .mutation(async (opts): Promise<IBillWithoutImages> => {
-    const newBill = await Bill.create({
+    const bill = new Bill({
       name: opts.input.name,
       users: [],
       lineItems: [],
@@ -112,8 +112,16 @@ const billCreate = publicProcedure
       images: [],
     });
 
-    const { images, ...resp } = newBill;
-    return resp;
+    await bill.save();
+
+    return {
+      _id: bill._id,
+      name: bill.name,
+      users: bill.users,
+      lineItems: bill.lineItems,
+      tags: bill.tags,
+      proportionalCharges: bill.proportionalCharges,
+    };
   });
 
 /**
