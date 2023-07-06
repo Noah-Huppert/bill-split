@@ -6,13 +6,21 @@ import { v4 as uuidv4 } from "uuid";
 
 import { IImage } from "../../../../api/src/models/bill";
 import { ToasterCtx } from "../Toaster/Toaster";
+import { Loadable, isLoading } from "../../lib/loadable";
+import { Loading } from "../Loading/Loading";
 
 export function Images({
   images,
 }: {
-  readonly images: IImage[],
+  readonly images: Loadable<IImage[]>,
 }) {
   const [uploadMenuOpen, setUploadMenuOpen] = useState(false);
+
+  if (isLoading(images)) {
+    return (
+      <Loading />
+    );
+  }
 
   return (
     <>
@@ -34,7 +42,7 @@ export function Images({
           </Typography>
         </IconButton>
         <ImageList>
-          {images.map((image) => (
+          {images.data.map((image) => (
             <ImageListItem key={image._id}>
               <img src={`data:${image.mimeType};base64, ${image.base64Data}`} />
             </ImageListItem>

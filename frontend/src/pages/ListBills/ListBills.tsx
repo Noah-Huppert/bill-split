@@ -11,6 +11,7 @@ import { IBill } from "../../../../api/src/models/bill";
 import { ROUTES } from "../../routes";
 import "./ListBills.scss";
 import { Loading } from "../../components/Loading/Loading";
+import { IBillSummary } from "../../../../api/src/endpoints.ts/bill";
 
 export function ListBills() {
   return (
@@ -37,7 +38,7 @@ export function ListBills() {
 }
 
 function BillsList() {
-  const [bills, setBills] = useState<IBill[] | null>(null);
+  const [bills, setBills] = useState<IBillSummary[] | null>(null);
   const toast = useContext(ToasterCtx);
 
   const fetchBills = useCallback(async () => {
@@ -85,7 +86,7 @@ function BillsList() {
 				</TableHead>	
 				<TableBody>
 					{bills.map((bill) => (
-						<BillItem key={bill._id} bill={bill} />
+						<BillItem key={bill._id} billSummary={bill} />
 					))}
 				</TableBody>
 			</Table>
@@ -93,9 +94,9 @@ function BillsList() {
   );
 }
 
-function BillItem({ bill }: { readonly bill: IBill }) {
+function BillItem({ billSummary }: { readonly billSummary: IBillSummary }) {
   const navigate = useNavigate();
-	const onClick = () => navigate(ROUTES.bills.getById(bill._id));
+	const onClick = () => navigate(ROUTES.bills.getById(billSummary._id));
 
   return (
     <TableRow hover={true} onClick={onClick} sx={{
@@ -103,9 +104,9 @@ function BillItem({ bill }: { readonly bill: IBill }) {
 				cursor: "pointer",
 			},
 		}}>
-			<TableCell>{bill.name}</TableCell>
-			<TableCell>{bill.lineItems.length}</TableCell>
-			<TableCell>{bill.users.length}</TableCell>
+			<TableCell>{billSummary.name}</TableCell>
+			<TableCell>{billSummary.lineItemsCount}</TableCell>
+			<TableCell>{billSummary.usersCount}</TableCell>
 			<TableCell>
 				<IconButton
 					onClick={onClick}>

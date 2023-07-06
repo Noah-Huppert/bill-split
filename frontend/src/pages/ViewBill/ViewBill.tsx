@@ -5,9 +5,11 @@ import { Link, useParams } from "react-router-dom";
 import { ROUTES } from "../../routes";
 import { trpc } from "../../trpc";
 import { ToasterCtx } from "../../components/Toaster/Toaster";
-import { Loading } from "../../components/Loading/Loading";
-import { IBill } from "../../../../api/src/models/bill";
+import { IImage } from "../../../../api/src/models/bill";
 import { Images } from "../../components/Images/Images";
+import { IBillWithoutImages } from "../../../../api/src/endpoints.ts/bill";
+import { Loadable, isLoaded, isLoading, newLoaded, newLoading } from "../../lib/loadable";
+import { NotFoundable, isNotFound, newLoadedOrNotFound } from "../../lib/notFoundable";
 
 export function ViewBill() {
   const { id } = useParams();
@@ -24,28 +26,40 @@ export function ViewBill() {
     return;
   }
 
-  const [loading, setLoading] = useState(true);
-  const [bill, setBill] = useState<IBill | null>(null);
+  const [bill, setBill] = useState<NotFoundable<IBillWithoutImages>>(newLoading());
+  const [billImages, setBillImages] = useState<NotFoundable<IImage[]>>(newLoading());
 
   const fetchBill = useCallback(async () => {
-    setBill(await trpc.billGet.query({ id }));
-    setLoading(false);
-  }, [setBill, setLoading]);
+    setBill(newLoadedOrNotFound(await trpc.billGet.query({ id })));
+  }, [setBill, newLoadedOrNotFound]);
+
+  const fetchBillImages = useCallback(async () => {
+    setBillImages(newLoadedOrNotFound(await trpc.billGetImages.query({ id })));
+  }, [setBillImages, newLoadedOrNotFound]);
 
   useEffect(() => {
     fetchBill().catch((e) =>
-      reportError({
-        userError: "Failed to get bill",
-        systemError: e,
+      toast({
+        _tag: "error",
+        error: {
+          userError: "Failed to get bill",
+          systemError: e,
+        },
       })
     );
-  }, [fetchBill, reportError]);
+  }, [fetchBill, toast]);
 
-  if (loading) {
-    return <Loading />;
-  }
+  useEffect(() => {
+    fetchBillImages().catch((e) => toast({
+      _tag: "error",
+      error: {
+        userError: "Failed to get bill images",
+        systemError: e,
+      },
+    }))
+  }, [fetchBillImages, toast]);
 
-  if (!bill) {
+  if (isNotFound(bill) || isNotFound(billImages)) {
     return <Typography variant="h5">Bill Not Found</Typography>;
   }
 
@@ -53,10 +67,12 @@ export function ViewBill() {
     <>
       <Breadcrumbs>
         <Link to={ROUTES.bills.list}>Bills</Link>
-        <div>{bill.name}</div>
+        {isLoading(bill) ? ("...") : (
+          <div>{bill.data.name}</div>
+        )}
       </Breadcrumbs>
-      
-      <Images images={bill.images} />
+        
+      <Images images={billImages} />
     </>
   );
 }
