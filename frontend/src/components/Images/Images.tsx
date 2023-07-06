@@ -104,7 +104,15 @@ function ImagesContent({
         <UploadImage          
           onClose={() => setUploadMenuOpen(false)}
           onUpload={onUpload}
-          parentComponent={Box}
+          parentComponent={({children}) => (
+            <Box
+              sx={{
+                paddingBottom: "1rem",
+              }}
+            >
+              {children}
+            </Box>
+          )}
           showCloseButton={false}
         />
       )}
