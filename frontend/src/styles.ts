@@ -8,10 +8,14 @@ import "@fontsource/noto-sans/700.css";
 
 import "./index.scss";
 
+/**
+ * Indicates if the color pallet is in dark or light mode.
+ */
 export enum ThemeMode {
   Light = "light",
   Dark = "dark",
 }
+
 const lightTheme = createTheme({
   palette: {
     primary: {
@@ -47,6 +51,10 @@ const darkTheme = createTheme({
   },
 });
 
+/**
+ * Reads local storage to see if the user has selected either dark or light more, defaults to light mode.
+ * @returns The color palette the user has selected
+ */
 export function useTheme(): [Theme, ThemeMode, (mode: ThemeMode) => void] {
   // Dark or light mode
   const [themeMode, setThemeModeStorage] = useLocalStorage(
@@ -59,3 +67,18 @@ export function useTheme(): [Theme, ThemeMode, (mode: ThemeMode) => void] {
 
   return [theme, themeMode === ThemeMode.Light ? ThemeMode.Light : ThemeMode.Dark, setThemeMode];
 }
+
+/**
+ * Z-Indexes used in styling.
+ */
+export const Z_INDEXES = {
+  /**
+   * Standard website content.
+   */
+  normal: 1,
+
+  /**
+   * Alerts, should appear above all things.
+   */
+  alerts: 1000,
+};

@@ -1,6 +1,7 @@
-import { Alert } from "@mui/material";
-import { useState, createContext, ReactNode } from "react";
+import { Alert, Box } from "@mui/material";
+import { useState, createContext, ReactNode, useCallback } from "react";
 import { v4 as uuidv4 } from "uuid";
+import { Z_INDEXES } from "../../styles";
 
 /**
  * User friendly error message.
@@ -79,17 +80,24 @@ export function Toaster({
 }) {
   const [toasts, setToasts] = useState<{[key: string]: Toast}>({});
 
-  const showToast = (toast: Toast) => {
+  const hideToast = (uuid: string) => {
+    const toastsCopy = { ... toasts };
+    delete toastsCopy[uuid];
+
+    setToasts(toastsCopy);
+  };
+
+  const showToast = useCallback((toast: Toast) => {
     if (toast._tag === "error") {
       console.error(`${toast.error.userError}: ${toast.error.systemError}`);
     }
     const uuid = uuidv4();
 
-    setToasts({
-      ...toasts,
-      [uuid]: toast,
-    });
+    const toastsCopy = { ...toasts };
+    toastsCopy[uuid] = toast;
+    setToasts(toastsCopy);
 
+    // Setup auto-hiding
     let autoHide = toast.autoHide;
     if (autoHide === undefined) {
       autoHide = true;
@@ -99,30 +107,50 @@ export function Toaster({
       autoHideAfter = DEFAULT_TOAST_AUTO_HIDE_AFTER_MS;
     }
 
-    setTimeout(() => {
-      if (uuid in toasts) {
-        const toastsCopy = {...toasts};
-        delete toastsCopy[uuid];
-        setToasts(toastsCopy);
-      }
-    }, autoHideAfter);
-  };
+    if (autoHide === true) {
+      setTimeout(() => {
+        hideToast(uuid);
+      }, autoHideAfter);
+    }
+  }, [setToasts, hideToast]);
 
   return (
     <ToasterCtx.Provider value={showToast}>
-      {Object.keys(toasts).map((uuid) => (
-          <Alert
-            key={uuid}
-            severity={toasts[uuid]._tag}
-            onClose={() => {
-              const toastsCopy = {...toasts};
-              delete toastsCopy[uuid];
-              setToasts(toastsCopy);
-            }}
-          >
-            {getToastText(toasts[uuid])}
-          </Alert>
-        ))}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+
+          zIndex: Z_INDEXES.alerts,
+          position: "absolute",
+
+          width: "100%",
+          padding: "0.5rem",
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          {Object.keys(toasts).map((uuid) => (
+              <Alert
+                key={uuid}
+                severity={toasts[uuid]._tag}
+                onClose={() => {
+                  hideToast(uuid);
+                }}
+                sx={{
+                  marginTop: "0.5rem",
+                  boxShadow: 2,
+                }}
+              >
+                {getToastText(toasts[uuid])}
+              </Alert>
+            ))}
+          </Box>
+        </Box>
       {children}
     </ToasterCtx.Provider>
   );

@@ -1,10 +1,11 @@
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, useContext, useEffect, useState } from "react";
 import { Box, Button, IconButton, ImageList, ImageListItem, LinearProgress, Paper, Typography } from "@mui/material";
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import ClearIcon from '@mui/icons-material/Clear';
 import { v4 as uuidv4 } from "uuid";
 
 import { IImage } from "../../../../api/src/models/bill";
+import { ToasterCtx } from "../Toaster/Toaster";
 
 export function Images({
   images,
@@ -141,6 +142,7 @@ function UploadImage({
 }: {
   readonly onClose: () => void,
 }) {
+  const toast = useContext(ToasterCtx);
   const [files, setFiles] = useState<{ [key: string]: {
     fileReader: FileReader,
     name: string,
@@ -148,16 +150,23 @@ function UploadImage({
   }}>({});
 
   const onFileUpload = async (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files === null) {
+    // Check file was selected
+    if (e.target.files === null || e.target.files.length < 1) {
       return;
     }
 
     const targetFiles = e.target.files;
 
+    // Check file isn't already going to be uploaded
     if (Object.values(files).filter((file) => file.name === targetFiles[0].name).length > 0) {
+      toast({
+        _tag: "info",
+        message: `File '${targetFiles[0].name} already added for upload`,
+      })
       return;
     }
     
+    // Start reading file
     const filesCopy = {...files};
     const uuid = uuidv4();
     const reader = new FileReader();
