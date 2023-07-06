@@ -1,7 +1,16 @@
 import { ChangeEvent, useContext, useEffect, useState } from "react";
-import { Box, Button, IconButton, ImageList, ImageListItem, LinearProgress, Paper, Typography } from "@mui/material";
-import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
-import ClearIcon from '@mui/icons-material/Clear';
+import {
+  Box,
+  Button,
+  IconButton,
+  ImageList,
+  ImageListItem,
+  LinearProgress,
+  Paper,
+  Typography,
+} from "@mui/material";
+import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
+import ClearIcon from "@mui/icons-material/Clear";
 import { v4 as uuidv4 } from "uuid";
 
 import { IImage } from "../../../../api/src/models/bill";
@@ -9,37 +18,25 @@ import { ToasterCtx } from "../Toaster/Toaster";
 import { Loadable, isLoading } from "../../lib/loadable";
 import { Loading } from "../Loading/Loading";
 
-export function Images({
-  images,
-}: {
-  readonly images: Loadable<IImage[]>,
-}) {
+export function Images({ images }: { readonly images: Loadable<IImage[]> }) {
   const [uploadMenuOpen, setUploadMenuOpen] = useState(false);
 
   if (isLoading(images)) {
-    return (
-      <Loading />
-    );
+    return <Loading />;
   }
 
   return (
     <>
       {uploadMenuOpen && (
-        <UploadImage
-          onClose={() => setUploadMenuOpen(false)}
-        />
+        <UploadImage onClose={() => setUploadMenuOpen(false)} />
       )}
 
       <Paper>
         <Typography variant="h6">Images</Typography>
-        
-        <IconButton
-          onClick={() => setUploadMenuOpen(true)}
-        >
+
+        <IconButton onClick={() => setUploadMenuOpen(true)}>
           <AddPhotoAlternateIcon />
-          <Typography>
-            Add Photos
-          </Typography>
+          <Typography>Add Photos</Typography>
         </IconButton>
         <ImageList>
           {images.data.map((image) => (
@@ -72,10 +69,10 @@ function FileToUpload({
   onRemove,
   onDone,
 }: {
-  readonly name: string,
-  readonly fileReader: FileReader,
-  readonly onRemove: () => void,
-  readonly onDone: () => void,
+  readonly name: string;
+  readonly fileReader: FileReader;
+  readonly onRemove: () => void;
+  readonly onDone: () => void;
 }) {
   const [status, setStatus] = useState(FileReadStatus.Pending);
   const [error, setError] = useState<string | null>(null);
@@ -127,13 +124,13 @@ function FileToUpload({
           marginLeft: "0.5rem",
         }}
       >
-        <Typography>
-          {name}
-        </Typography>
+        <Typography>{name}</Typography>
 
         {status !== FileReadStatus.Done && (
           <LinearProgress
-            variant={status == FileReadStatus.Pending ? "determinate" : "indeterminate"}
+            variant={
+              status == FileReadStatus.Pending ? "determinate" : "indeterminate"
+            }
             value={0}
           />
         )}
@@ -145,17 +142,15 @@ function FileToUpload({
 /**
  * Form which allows multiple images to be uploaded.
  */
-function UploadImage({
-  onClose,
-}: {
-  readonly onClose: () => void,
-}) {
+function UploadImage({ onClose }: { readonly onClose: () => void }) {
   const toast = useContext(ToasterCtx);
-  const [files, setFiles] = useState<{ [key: string]: {
-    fileReader: FileReader,
-    name: string,
-    done: boolean,
-  }}>({});
+  const [files, setFiles] = useState<{
+    [key: string]: {
+      fileReader: FileReader;
+      name: string;
+      done: boolean;
+    };
+  }>({});
 
   const onFileUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     // Check file was selected
@@ -166,16 +161,19 @@ function UploadImage({
     const targetFiles = e.target.files;
 
     // Check file isn't already going to be uploaded
-    if (Object.values(files).filter((file) => file.name === targetFiles[0].name).length > 0) {
+    if (
+      Object.values(files).filter((file) => file.name === targetFiles[0].name)
+        .length > 0
+    ) {
       toast({
         _tag: "info",
         message: `File '${targetFiles[0].name} already added for upload`,
-      })
+      });
       return;
     }
-    
+
     // Start reading file
-    const filesCopy = {...files};
+    const filesCopy = { ...files };
     const uuid = uuidv4();
     const reader = new FileReader();
 
@@ -185,7 +183,7 @@ function UploadImage({
       done: false,
     };
     reader.readAsArrayBuffer(e.target.files[0]);
-      
+
     setFiles(filesCopy);
   };
 
@@ -197,91 +195,86 @@ function UploadImage({
         marginBottom: "1rem",
       }}
     >
-      <form
-        onSubmit={() => {
+      <form onSubmit={() => {}}>
+        <Button
+          component="label"
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            padding: "0.5rem",
 
-        }}
-      >
-          <Button
-            component="label"
+            borderStyle: "dashed",
+            borderWidth: "0.1rem",
+
+            color: "text.primary",
+          }}
+        >
+          <input onChange={onFileUpload} type="file" accept="image/*" hidden />
+          <AddPhotoAlternateIcon fontSize="large" />
+          <Typography
+            variant="h6"
             sx={{
-              display: "flex",
-              flexDirection: "column",
-              padding: "0.5rem",
-
-              borderStyle: "dashed",
-              borderWidth: "0.1rem",
-
-              color: "text.primary",
+              marginTop: "0.5rem",
             }}
           >
-            <input
-              onChange={onFileUpload}
-              type="file"
-              accept="image/*"
-              hidden
+            Upload Image
+          </Typography>
+        </Button>
+
+        <Box>
+          {Object.keys(files).map((uuid) => (
+            <FileToUpload
+              key={uuid}
+              name={files[uuid].name}
+              fileReader={files[uuid].fileReader}
+              onRemove={() => {
+                const filesCopy = { ...files };
+                delete filesCopy[uuid];
+                setFiles(filesCopy);
+              }}
+              onDone={() => {
+                const filesCopy = { ...files };
+                filesCopy[uuid].done = true;
+                setFiles(filesCopy);
+              }}
             />
-            <AddPhotoAlternateIcon fontSize="large" />
-            <Typography
-              variant="h6"
-              sx={{
-                marginTop: "0.5rem",
-              }}
-            >
-              Upload Image
-            </Typography>
-          </Button>
+          ))}
+        </Box>
 
-          <Box>
-            {Object.keys(files).map((uuid) => (
-              <FileToUpload
-                key={uuid}
-                name={files[uuid].name}
-                fileReader={files[uuid].fileReader}
-                onRemove={() => {
-                  const filesCopy = {...files};
-                  delete filesCopy[uuid];
-                  setFiles(filesCopy);
-                }}
-                onDone={() => {
-                  const filesCopy = {...files};
-                  filesCopy[uuid].done = true;
-                  setFiles(filesCopy);
-                }}
-              />
-            ))}
-          </Box>
-
-          <Box
+        <Box
+          sx={{
+            marginTop: "1rem",
+            display: "flex",
+            justifyContent: "space-between",
+          }}
+        >
+          <Button
+            variant="outlined"
             sx={{
-              marginTop: "1rem",
-              display: "flex",
-              justifyContent: "space-between",
-            }}
-          >
-            <Button
-              variant="outlined"
-              sx={{
-                marginRight: "1rem",
-                color: "text.primary",
+              marginRight: "1rem",
+              color: "text.primary",
+              borderColor: "text.primary",
+              ":hover": {
                 borderColor: "text.primary",
-                ":hover": {
-                  borderColor: "text.primary",
-                }
-              }}
-              onClick={onClose}
-            >
-              Close
-            </Button>
-            <Button
-              type="submit"
-              variant="contained"
-              disabled={Object.keys(files).length < 1 || Object.values(files).filter((file) => file.done === false).length > 0}
-            >
-              Upload
-            </Button>
-          </Box>
+              },
+            }}
+            onClick={onClose}
+          >
+            Close
+          </Button>
+          <Button
+            type="submit"
+            variant="contained"
+            disabled={
+              Object.keys(files).length < 1 ||
+              Object.values(files).filter((file) => file.done === false)
+                .length > 0
+            }
+          >
+            Upload
+          </Button>
+        </Box>
       </form>
     </Paper>
-  )
+  );
 }

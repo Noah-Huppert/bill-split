@@ -1,3 +1,3 @@
 import { endpoints as billEndpoints } from "./bill";
 
-export const endpoints = {...billEndpoints};
+export const endpoints = { ...billEndpoints };

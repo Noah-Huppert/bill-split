@@ -65,7 +65,11 @@ export function useTheme(): [Theme, ThemeMode, (mode: ThemeMode) => void] {
   const theme = themeMode === ThemeMode.Light ? lightTheme : darkTheme;
   const setThemeMode = (mode: ThemeMode) => setThemeModeStorage(mode);
 
-  return [theme, themeMode === ThemeMode.Light ? ThemeMode.Light : ThemeMode.Dark, setThemeMode];
+  return [
+    theme,
+    themeMode === ThemeMode.Light ? ThemeMode.Light : ThemeMode.Dark,
+    setThemeMode,
+  ];
 }
 
 /**

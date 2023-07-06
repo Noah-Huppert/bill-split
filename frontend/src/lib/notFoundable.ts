@@ -6,8 +6,8 @@ import { Loadable, Loaded, newLoaded } from "./loadable";
  */
 export type NotFoundable<D> = Loadable<D> | NotFound;
 
-export type NotFound =  {
-  _tag: "notfound",
+export type NotFound = {
+  _tag: "notfound";
 };
 
 /**
@@ -15,7 +15,9 @@ export type NotFound =  {
  * @param notFoundable NotFoundable to check
  * @returns True if NotFound
  */
-export function isNotFound(notFoundable: { _tag: string }): notFoundable is NotFound {
+export function isNotFound(notFoundable: {
+  _tag: string;
+}): notFoundable is NotFound {
   return notFoundable._tag === "notfound";
 }
 

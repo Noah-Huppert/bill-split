@@ -1,7 +1,22 @@
 import { useEffect, useState, useContext, useCallback } from "react";
 import KayakingIcon from "@mui/icons-material/Kayaking";
-import { Box, Button, IconButton, List, ListItemButton, ListItemText, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
-import ListAltIcon from '@mui/icons-material/ListAlt';
+import {
+  Box,
+  Button,
+  IconButton,
+  List,
+  ListItemButton,
+  ListItemText,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+} from "@mui/material";
+import ListAltIcon from "@mui/icons-material/ListAlt";
 import AddBusinessIcon from "@mui/icons-material/AddBusiness";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -74,50 +89,55 @@ function BillsList() {
   }
 
   return (
-		<TableContainer component={Paper}>
-			<Table>
-				<TableHead>
-					<TableRow>
-						<TableCell>Name</TableCell>
-						<TableCell>Items</TableCell>
-						<TableCell>People</TableCell>
-						<TableCell width="10"></TableCell>
-					</TableRow>
-				</TableHead>	
-				<TableBody>
-					{bills.map((bill) => (
-						<BillItem key={bill._id} billSummary={bill} />
-					))}
-				</TableBody>
-			</Table>
-		</TableContainer>
+    <TableContainer component={Paper}>
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell>Name</TableCell>
+            <TableCell>Items</TableCell>
+            <TableCell>People</TableCell>
+            <TableCell width="10"></TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {bills.map((bill) => (
+            <BillItem key={bill._id} billSummary={bill} />
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 }
 
 function BillItem({ billSummary }: { readonly billSummary: IBillSummary }) {
   const navigate = useNavigate();
-	const onClick = () => navigate(ROUTES.bills.getById(billSummary._id));
+  const onClick = () => navigate(ROUTES.bills.getById(billSummary._id));
 
   return (
-    <TableRow hover={true} onClick={onClick} sx={{
-			":hover": {
-				cursor: "pointer",
-			},
-		}}>
-			<TableCell>{billSummary.name}</TableCell>
-			<TableCell>{billSummary.lineItemsCount}</TableCell>
-			<TableCell>{billSummary.usersCount}</TableCell>
-			<TableCell>
-				<IconButton
-					onClick={onClick}>
-					<ListAltIcon fontSize="small" />
-					<Typography sx={{
-						marginLeft: "0.3rem",
-					}}>
-						View
-					</Typography>
-				</IconButton>
-			</TableCell>
+    <TableRow
+      hover={true}
+      onClick={onClick}
+      sx={{
+        ":hover": {
+          cursor: "pointer",
+        },
+      }}
+    >
+      <TableCell>{billSummary.name}</TableCell>
+      <TableCell>{billSummary.lineItemsCount}</TableCell>
+      <TableCell>{billSummary.usersCount}</TableCell>
+      <TableCell>
+        <IconButton onClick={onClick}>
+          <ListAltIcon fontSize="small" />
+          <Typography
+            sx={{
+              marginLeft: "0.3rem",
+            }}
+          >
+            View
+          </Typography>
+        </IconButton>
+      </TableCell>
     </TableRow>
   );
 }

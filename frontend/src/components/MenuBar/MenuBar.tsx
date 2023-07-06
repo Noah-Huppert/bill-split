@@ -16,9 +16,11 @@ export function MenuBar() {
       className="padding-1 margin-bottom-1 menu-bar"
     >
       <Link to={ROUTES.apex} className="menu-bar-start">
-        <Box sx={{
-          color: "common.white",
-        }}>
+        <Box
+          sx={{
+            color: "common.white",
+          }}
+        >
           <SavingsIcon fontSize="large" className="icon" />
         </Box>
 

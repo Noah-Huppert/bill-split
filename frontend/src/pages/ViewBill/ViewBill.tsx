@@ -8,8 +8,18 @@ import { ToasterCtx } from "../../components/Toaster/Toaster";
 import { IImage } from "../../../../api/src/models/bill";
 import { Images } from "../../components/Images/Images";
 import { IBillWithoutImages } from "../../../../api/src/endpoints.ts/bill";
-import { Loadable, isLoaded, isLoading, newLoaded, newLoading } from "../../lib/loadable";
-import { NotFoundable, isNotFound, newLoadedOrNotFound } from "../../lib/notFoundable";
+import {
+  Loadable,
+  isLoaded,
+  isLoading,
+  newLoaded,
+  newLoading,
+} from "../../lib/loadable";
+import {
+  NotFoundable,
+  isNotFound,
+  newLoadedOrNotFound,
+} from "../../lib/notFoundable";
 
 export function ViewBill() {
   const { id } = useParams();
@@ -26,8 +36,12 @@ export function ViewBill() {
     return;
   }
 
-  const [bill, setBill] = useState<NotFoundable<IBillWithoutImages>>(newLoading());
-  const [billImages, setBillImages] = useState<NotFoundable<IImage[]>>(newLoading());
+  const [bill, setBill] = useState<NotFoundable<IBillWithoutImages>>(
+    newLoading()
+  );
+  const [billImages, setBillImages] = useState<NotFoundable<IImage[]>>(
+    newLoading()
+  );
 
   const fetchBill = useCallback(async () => {
     setBill(newLoadedOrNotFound(await trpc.billGet.query({ id })));
@@ -50,13 +64,15 @@ export function ViewBill() {
   }, [fetchBill, toast]);
 
   useEffect(() => {
-    fetchBillImages().catch((e) => toast({
-      _tag: "error",
-      error: {
-        userError: "Failed to get bill images",
-        systemError: e,
-      },
-    }))
+    fetchBillImages().catch((e) =>
+      toast({
+        _tag: "error",
+        error: {
+          userError: "Failed to get bill images",
+          systemError: e,
+        },
+      })
+    );
   }, [fetchBillImages, toast]);
 
   if (isNotFound(bill) || isNotFound(billImages)) {
@@ -67,11 +83,9 @@ export function ViewBill() {
     <>
       <Breadcrumbs>
         <Link to={ROUTES.bills.list}>Bills</Link>
-        {isLoading(bill) ? ("...") : (
-          <div>{bill.data.name}</div>
-        )}
+        {isLoading(bill) ? "..." : <div>{bill.data.name}</div>}
       </Breadcrumbs>
-        
+
       <Images images={billImages} />
     </>
   );
