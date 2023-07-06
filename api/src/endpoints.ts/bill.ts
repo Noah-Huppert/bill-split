@@ -137,7 +137,12 @@ const billUploadImages = publicProcedure
     }, {
       $push: {
         images: {
-          $each: opts.input.images,
+          $each: opts.input.images.map((image) => {
+            return {
+              ...image,
+              _id: new Types.ObjectId(),
+            };
+          }),
         },
       },
     }, {
