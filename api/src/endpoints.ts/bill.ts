@@ -156,10 +156,44 @@ const billUploadImages = publicProcedure
     return newBill.images;
   });
 
+/**
+ * Delete an image from a bill.
+ * @prop billID ID of bill to which image belongs
+ * @prop imageID ID of image to delete
+ * @returns New bill images or null if bill or image does not exist
+ */
+const billDeleteImage = publicProcedure
+  .input(
+    z.object({
+      billID: z.string(),
+      imageID: z.string(),
+    })
+  )
+  .mutation(async (opts): Promise<IImage[] | null> => {
+    const newBill = await Bill.findOneAndUpdate({
+      _id: opts.input.billID,
+    }, {
+      $pull: {
+        images: {
+          _id: opts.input.imageID,
+        }
+      }
+    }, {
+      new: true,
+    });
+
+    if (newBill === undefined || newBill === null) {
+      return null;
+    }
+
+    return newBill.images;
+  });
+
 export const endpoints = {
   billList,
   billGet,
   billGetImages,
   billCreate,
   billUploadImages,
+  billDeleteImage,
 };
