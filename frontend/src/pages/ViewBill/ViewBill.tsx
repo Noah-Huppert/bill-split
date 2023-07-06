@@ -1,4 +1,10 @@
-import { useState, useContext, useCallback, useEffect, ReactElement } from "react";
+import {
+  useState,
+  useContext,
+  useCallback,
+  useEffect,
+  ReactElement,
+} from "react";
 import { Breadcrumbs, Paper, Typography } from "@mui/material";
 import { Link, useParams } from "react-router-dom";
 
@@ -8,10 +14,7 @@ import { ToasterCtx } from "../../components/Toaster/Toaster";
 import { IBill, IImage } from "../../../../api/src/models/bill";
 import { ImageUploadDetails, Images } from "../../components/Images/Images";
 import { IBillWithoutImages } from "../../../../api/src/endpoints.ts/bill";
-import {
-  isLoaded,
-  newLoading,
-} from "../../lib/loadable";
+import { isLoaded, newLoading } from "../../lib/loadable";
 import {
   NotFoundable,
   isNotFound,
@@ -51,46 +54,52 @@ export function ViewBill() {
 
   useEffect(() => {
     fetchBill().catch((e) => {
-        toast({
-          _tag: "error",
-          error: {
-            userError: "Failed to get bill",
-            systemError: e,
-          },
-        });
+      toast({
+        _tag: "error",
+        error: {
+          userError: "Failed to get bill",
+          systemError: e,
+        },
+      });
 
-        setBill(newNotFound());
-      }
-    );
+      setBill(newNotFound());
+    });
   }, [fetchBill, toast, setBill]);
 
   useEffect(() => {
     fetchBillImages().catch((e) => {
-        toast({
-          _tag: "error",
-          error: {
-            userError: "Failed to get bill images",
-            systemError: e,
-          },
-        });
+      toast({
+        _tag: "error",
+        error: {
+          userError: "Failed to get bill images",
+          systemError: e,
+        },
+      });
 
-        setBillImages(newNotFound());
-      }
-    );
+      setBillImages(newNotFound());
+    });
   }, [fetchBillImages, toast, setBillImages]);
 
   const onImageUpload = async (images: ImageUploadDetails[]): Promise<void> => {
-    setBillImages(newLoadedOrNotFound(await trpc.billUploadImages.mutate({
-      id: id,
-      images: images,
-    })));
+    setBillImages(
+      newLoadedOrNotFound(
+        await trpc.billUploadImages.mutate({
+          id: id,
+          images: images,
+        })
+      )
+    );
   };
 
   const onImageDelete = async (imageID: string): Promise<void> => {
-    setBillImages(newLoadedOrNotFound(await trpc.billDeleteImage.mutate({
-      billID: id,
-      imageID: imageID,
-    })));
+    setBillImages(
+      newLoadedOrNotFound(
+        await trpc.billDeleteImage.mutate({
+          billID: id,
+          imageID: imageID,
+        })
+      )
+    );
   };
 
   if (isNotFound(bill) || isNotFound(billImages)) {
@@ -106,7 +115,11 @@ export function ViewBill() {
     <>
       <ViewBillBreadcrumbs bill={bill} />
 
-      <Images onUpload={onImageUpload} onDelete={onImageDelete} images={billImages} />
+      <Images
+        onUpload={onImageUpload}
+        onDelete={onImageDelete}
+        images={billImages}
+      />
     </>
   );
 }
@@ -114,16 +127,16 @@ export function ViewBill() {
 function ViewBillBreadcrumbs({
   bill,
 }: {
-  readonly bill: NotFoundable<IBillWithoutImages>,
+  readonly bill: NotFoundable<IBillWithoutImages>;
 }) {
   return (
     <Breadcrumbs
-        sx={{
-          marginBottom: "1rem",
-        }}
-      >
-        <Link to={ROUTES.bills.list}>Bills</Link>
-        <div>{!isLoaded(bill) ? "..." : bill.data.name}</div>
-      </Breadcrumbs>
+      sx={{
+        marginBottom: "1rem",
+      }}
+    >
+      <Link to={ROUTES.bills.list}>Bills</Link>
+      <div>{!isLoaded(bill) ? "..." : bill.data.name}</div>
+    </Breadcrumbs>
   );
 }

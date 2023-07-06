@@ -17,7 +17,7 @@ import {
   Typography,
 } from "@mui/material";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
-import HighlightOffIcon from '@mui/icons-material/HighlightOff';
+import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 import ClearIcon from "@mui/icons-material/Clear";
 import { v4 as uuidv4 } from "uuid";
 
@@ -34,9 +34,9 @@ export function Images({
   onUpload,
   onDelete,
 }: {
-  readonly images: Loadable<IImage[]>,
-  readonly onUpload: (images: ImageUploadDetails[]) => Promise<void>,
-  readonly onDelete: (imageID: string) => Promise<void>,
+  readonly images: Loadable<IImage[]>;
+  readonly onUpload: (images: ImageUploadDetails[]) => Promise<void>;
+  readonly onDelete: (imageID: string) => Promise<void>;
 }) {
   const [uploadMenuOpen, setUploadMenuOpen] = useState(false);
 
@@ -66,7 +66,9 @@ export function Images({
           Images
         </Typography>
 
-        {isLoading(images) ? <Loading /> : (
+        {isLoading(images) ? (
+          <Loading />
+        ) : (
           <ImagesContent
             images={images.data}
             setUploadMenuOpen={(open: boolean) => setUploadMenuOpen(open)}
@@ -88,10 +90,10 @@ function ImagesContent({
   onUpload,
   onDelete,
 }: {
-  readonly images: IImage[],
-  readonly setUploadMenuOpen: (open: boolean) => void,
-  readonly onUpload: (images: ImageUploadDetails[]) => Promise<void>,
-  readonly onDelete: (imageID: string) => Promise<void>,
+  readonly images: IImage[];
+  readonly setUploadMenuOpen: (open: boolean) => void;
+  readonly onUpload: (images: ImageUploadDetails[]) => Promise<void>;
+  readonly onDelete: (imageID: string) => Promise<void>;
 }) {
   return (
     <>
@@ -101,10 +103,10 @@ function ImagesContent({
           <Typography>Add Photos</Typography>
         </IconButton>
       ) : (
-        <UploadImage          
+        <UploadImage
           onClose={() => setUploadMenuOpen(false)}
           onUpload={onUpload}
-          parentComponent={({children}) => (
+          parentComponent={({ children }) => (
             <Box
               sx={{
                 paddingBottom: "1rem",
@@ -133,8 +135,8 @@ function Image({
   image,
   onDelete,
 }: {
-  readonly image: IImage,
-  readonly onDelete: (imageID: string) => Promise<void>,
+  readonly image: IImage;
+  readonly onDelete: (imageID: string) => Promise<void>;
 }) {
   const toast = useContext(ToasterCtx);
 
@@ -353,24 +355,29 @@ function UploadImage({
 
       // Get file contents from FileReaders
       let badFiles: {
-        uuid: string,
-        name: string,
-        systemError: string,
+        uuid: string;
+        name: string;
+        systemError: string;
       }[] = [];
       let uploadFiles: {
-        mimeType: string,
-        base64Data: string,
+        mimeType: string;
+        base64Data: string;
       }[] = [];
 
       for (const uuid of Object.keys(files)) {
         const file = files[uuid];
 
         // Check if result is as expected
-        if (file.fileReader.result === null || typeof file.fileReader.result !== "string") {
+        if (
+          file.fileReader.result === null ||
+          typeof file.fileReader.result !== "string"
+        ) {
           badFiles.push({
             uuid: uuid,
             name: file.name,
-            systemError: `File '${uuid}' did not have its contents read as a string (is null=${file.fileReader.result === null}, typeof=${typeof file.fileReader.result})`,
+            systemError: `File '${uuid}' did not have its contents read as a string (is null=${
+              file.fileReader.result === null
+            }, typeof=${typeof file.fileReader.result})`,
           });
           continue;
         }
@@ -403,14 +410,16 @@ function UploadImage({
           base64Data: base64DataParts[1],
         });
       }
-      
+
       if (badFiles.length > 0) {
-        console.error(badFiles)
+        console.error(badFiles);
         toast({
           _tag: "error",
           error: {
-            userError: `Failed to prepare file(s) for upload: ${badFiles.map((file) => file.name).join(", ")}`,
-            systemError: "",//`${badFiles}`,
+            userError: `Failed to prepare file(s) for upload: ${badFiles
+              .map((file) => file.name)
+              .join(", ")}`,
+            systemError: "", //`${badFiles}`,
           },
         });
         setIsUploading(false);
@@ -484,46 +493,45 @@ function UploadImage({
           ))}
         </Box>
 
-        {(alwaysShowButtons ||
-          Object.keys(files).length > 0) && (
-            <Box
-              sx={{
-                marginTop: "1rem",
-                display: "flex",
-                justifyContent: "space-between",
-              }}
-            >
-              {showCloseButton && (
-                <Button
-                  variant="outlined"
-                  sx={{
-                    marginRight: "1rem",
-                    color: "text.primary",
-                    borderColor: "text.primary",
-                    ":hover": {
-                      borderColor: "text.primary",
-                    },
-                  }}
-                  onClick={onClose}
-                >
-                  Close
-                </Button>
-              )}
+        {(alwaysShowButtons || Object.keys(files).length > 0) && (
+          <Box
+            sx={{
+              marginTop: "1rem",
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+          >
+            {showCloseButton && (
               <Button
-                type="submit"
-                variant="contained"
-                disabled={
-                  isUploading ||
-                  Object.keys(files).length == 0 ||
-                  Object.values(files).filter((file) => file.done === false)
-                    .length > 0
-                }
+                variant="outlined"
+                sx={{
+                  marginRight: "1rem",
+                  color: "text.primary",
+                  borderColor: "text.primary",
+                  ":hover": {
+                    borderColor: "text.primary",
+                  },
+                }}
+                onClick={onClose}
               >
-                {isUploading && <Loading />}
-                Upload
+                Close
               </Button>
-            </Box>
-          )}
+            )}
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={
+                isUploading ||
+                Object.keys(files).length == 0 ||
+                Object.values(files).filter((file) => file.done === false)
+                  .length > 0
+              }
+            >
+              {isUploading && <Loading />}
+              Upload
+            </Button>
+          </Box>
+        )}
       </form>
     </ParentComponent>
   );

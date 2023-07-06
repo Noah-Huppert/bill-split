@@ -134,29 +134,35 @@ const billUploadImages = publicProcedure
   .input(
     z.object({
       id: z.string(),
-      images: z.array(z.object({
-        mimeType: z.string(),
-        base64Data: z.string(),
-      })),
+      images: z.array(
+        z.object({
+          mimeType: z.string(),
+          base64Data: z.string(),
+        })
+      ),
     })
   )
   .mutation(async (opts): Promise<IImage[] | null> => {
-    const newBill = await Bill.findOneAndUpdate({
-      _id: opts.input.id,
-    }, {
-      $push: {
-        images: {
-          $each: opts.input.images.map((image) => {
-            return {
-              ...image,
-              _id: new Types.ObjectId(),
-            };
-          }),
+    const newBill = await Bill.findOneAndUpdate(
+      {
+        _id: opts.input.id,
+      },
+      {
+        $push: {
+          images: {
+            $each: opts.input.images.map((image) => {
+              return {
+                ...image,
+                _id: new Types.ObjectId(),
+              };
+            }),
+          },
         },
       },
-    }, {
-      new: true,
-    });
+      {
+        new: true,
+      }
+    );
 
     if (newBill === undefined || newBill === null) {
       return null;
@@ -179,17 +185,21 @@ const billDeleteImage = publicProcedure
     })
   )
   .mutation(async (opts): Promise<IImage[] | null> => {
-    const newBill = await Bill.findOneAndUpdate({
-      _id: opts.input.billID,
-    }, {
-      $pull: {
-        images: {
-          _id: opts.input.imageID,
-        }
+    const newBill = await Bill.findOneAndUpdate(
+      {
+        _id: opts.input.billID,
+      },
+      {
+        $pull: {
+          images: {
+            _id: opts.input.imageID,
+          },
+        },
+      },
+      {
+        new: true,
       }
-    }, {
-      new: true,
-    });
+    );
 
     if (newBill === undefined || newBill === null) {
       return null;

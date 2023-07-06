@@ -81,12 +81,15 @@ export const ToasterCtx = createContext((_: Toast) => {});
 export function Toaster({ children }: { readonly children: ReactNode }) {
   const [toasts, setToasts] = useState<{ [key: string]: Toast }>({});
 
-  const hideToast = useCallback((uuid: string) => {
-    const toastsCopy = { ...toasts };
-    delete toastsCopy[uuid];
+  const hideToast = useCallback(
+    (uuid: string) => {
+      const toastsCopy = { ...toasts };
+      delete toastsCopy[uuid];
 
-    setToasts(toastsCopy);
-  }, [setToasts]);
+      setToasts(toastsCopy);
+    },
+    [setToasts]
+  );
 
   const showToast = useCallback(
     (toast: Toast) => {
