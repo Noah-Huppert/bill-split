@@ -1,12 +1,21 @@
 import "react";
 
-import "./Loading.scss";
-import { CircularProgress } from "@mui/material";
+import { Box, CircularProgress, SxProps, Theme } from "@mui/material";
 
-export function Loading() {
+export function Loading({
+  sx={},
+}: {
+  readonly sx?: SxProps<Theme>
+}) {
   return (
-    <div className="loading-container">
+    <Box
+      sx={{
+        ...sx,
+        display: "flex",
+        justifyContent: "center",
+      }}
+    >
       <CircularProgress />
-    </div>
+    </Box>
   );
 }

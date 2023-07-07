@@ -1,8 +1,10 @@
 import "react";
+import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
+
 import { ILineItem } from "../../../../../api/src/models/bill";
-import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
 import { NotFoundable, isNotFound } from "../../../lib/notFoundable";
-import { isLoaded, isLoading } from "../../../lib/loadable";
+import { isLoading } from "../../../lib/loadable";
 import { Loading } from "../../../components/Loading/Loading";
 
 export function LineItems({
@@ -28,22 +30,61 @@ export function LineItems({
               </TableRow>
             </TableHead>
 
+            
             <TableBody>
               {isLoading(lineItems) ? (
-                <Loading />
-              ) : isNotFound(lineItems) ? (
-                <>
-                  Not found
-                </>
-              ) : lineItems.data.map((lineItem) => (
-                <TableRow key={lineItem._id}>
-                  <TableCell>{lineItem.name}</TableCell>
-                  <TableCell>{lineItem.price}</TableCell>
-                  <TableCell>{lineItem.tags}</TableCell>
-                  <TableCell>{JSON.stringify(lineItem.usersSplit)}</TableCell>
+                <TableRow>
+                  <TableCell
+                    colSpan={4}
+                    sx={{
+                      borderBottom: "none",
+                      padding: "10%",
+                    }}
+                  >
+                    <Loading/>
+                  </TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
+              ) : !isNotFound(lineItems) && lineItems.data.length > 0 ? lineItems.data.map((lineItem) => (
+                  <TableRow key={lineItem._id}>
+                    <TableCell>{lineItem.name}</TableCell>
+                    <TableCell>{lineItem.price}</TableCell>
+                    <TableCell>{lineItem.tags}</TableCell>
+                    <TableCell>{JSON.stringify(lineItem.usersSplit)}</TableCell>
+                  </TableRow>
+              )) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={4}
+                    sx={{
+                      borderBottom: "none",
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          color: "text.default",
+                        }}
+                      >
+                        <ReceiptLongIcon
+                          sx={{
+                            fontSize: "6rem",
+                          }}
+                        />
+                        <Typography variant="h6">No Line Items</Typography>
+                      </Box>
+                    </Box>
+                  </TableCell>
+                </TableRow>
+              )}
+              </TableBody>
           </Table>
         </TableContainer>
       </Paper>

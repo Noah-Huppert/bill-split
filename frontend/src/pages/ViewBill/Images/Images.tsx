@@ -46,7 +46,6 @@ export function Images({
     <Box
       sx={{
         flexBasis: "33%",
-        alignSelf: "end",
       }}
     >
       {uploadMenuOpen && (
