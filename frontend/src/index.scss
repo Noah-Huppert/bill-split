@@ -1,3 +1,13 @@
+// Colors
+// https://coolors.co/d972ff-090c9b-ff6663-e0ff4f-fefffe
+$primary: #0b3954;
+$secondary: #7768ae;
+$alert: #ff6663;
+$ascent: #e0ff4f;
+$background: #fefffe;
+$foreground: #000000;
+$border: lighten($foreground, 80%);
+
 // Overrides
 a {
   text-decoration: none;
