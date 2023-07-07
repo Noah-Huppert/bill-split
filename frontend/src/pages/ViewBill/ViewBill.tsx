@@ -20,7 +20,9 @@ import {
   isNotFound,
   newLoadedOrNotFound,
   newNotFound,
+  newNotFoundableFromKey,
 } from "../../lib/notFoundable";
+import { LineItems } from "./LineItems/LineItems";
 
 export function ViewBill() {
   const { id } = useParams();
@@ -118,10 +120,11 @@ export function ViewBill() {
       <Box
         sx={{
           display: "flex",
-          flexDirection: "column",
+          flexDirection: "row",
+          justifyContent: "space-between",
         }}
       >
-        
+        <LineItems lineItems={newNotFoundableFromKey(bill, "lineItems")} />
         <Images
           onUpload={onImageUpload}
           onDelete={onImageDelete}

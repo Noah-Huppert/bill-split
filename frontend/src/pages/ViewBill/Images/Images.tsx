@@ -28,8 +28,6 @@ import { Loading } from "../../../components/Loading/Loading";
 
 import "./Images.scss";
 
-const imagesMaxWidth = "40rem";
-
 /**
  * Displays images for a bill.
  */
@@ -47,7 +45,7 @@ export function Images({
   return (
     <Box
       sx={{
-        maxWidth: imagesMaxWidth,
+        flexBasis: "33%",
         alignSelf: "end",
       }}
     >
@@ -92,7 +90,6 @@ export function Images({
         {isLoading(images) ? (
           <Box
             sx={{
-              width: imagesMaxWidth,
               padding: "10%",
             }}
           >
