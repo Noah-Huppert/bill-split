@@ -12,7 +12,7 @@ import { ROUTES } from "../../routes";
 import { trpc } from "../../trpc";
 import { ToasterCtx } from "../../components/Toaster/Toaster";
 import { IBill, IImage } from "../../../../api/src/models/bill";
-import { ImageUploadDetails, Images } from "../../components/Images/Images";
+import { ImageUploadDetails, Images } from "./Images/Images";
 import { IBillWithoutImages } from "../../../../api/src/endpoints.ts/bill";
 import { isLoaded, newLoading } from "../../lib/loadable";
 import {
@@ -121,6 +121,7 @@ export function ViewBill() {
           flexDirection: "column",
         }}
       >
+        
         <Images
           onUpload={onImageUpload}
           onDelete={onImageDelete}

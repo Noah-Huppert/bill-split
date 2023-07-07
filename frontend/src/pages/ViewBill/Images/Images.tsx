@@ -21,10 +21,10 @@ import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import ClearIcon from "@mui/icons-material/Clear";
 import { v4 as uuidv4 } from "uuid";
 
-import { IImage } from "../../../../api/src/models/bill";
-import { ToasterCtx } from "../Toaster/Toaster";
-import { Loadable, isLoaded, isLoading } from "../../lib/loadable";
-import { Loading } from "../Loading/Loading";
+import { IImage } from "../../../../../api/src/models/bill";
+import { ToasterCtx } from "../../../components/Toaster/Toaster";
+import { Loadable, isLoaded, isLoading } from "../../../lib/loadable";
+import { Loading } from "../../../components/Loading/Loading";
 
 import "./Images.scss";
 
