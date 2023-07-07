@@ -123,10 +123,10 @@ function BillItem({ billSummary }: { readonly billSummary: IBillSummary }) {
         },
       }}
     >
-      <TableCell>{billSummary.name}</TableCell>
-      <TableCell>{billSummary.lineItemsCount}</TableCell>
-      <TableCell>{billSummary.usersCount}</TableCell>
-      <TableCell>
+      <TableCell size="small">{billSummary.name}</TableCell>
+      <TableCell size="small">{billSummary.lineItemsCount}</TableCell>
+      <TableCell size="small">{billSummary.usersCount}</TableCell>
+      <TableCell size="small">
         <IconButton onClick={onClick}>
           <ListAltIcon fontSize="small" />
           <Typography

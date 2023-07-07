@@ -6,7 +6,6 @@ import {
   ReactNode,
   ReactElement,
   FunctionComponent,
-  useCallback,
 } from "react";
 import {
   Box,
@@ -17,7 +16,7 @@ import {
   Typography,
 } from "@mui/material";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
-import HighlightOffIcon from "@mui/icons-material/HighlightOff";
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import ClearIcon from "@mui/icons-material/Clear";
 import { v4 as uuidv4 } from "uuid";
 
@@ -25,6 +24,8 @@ import { IImage } from "../../../../api/src/models/bill";
 import { ToasterCtx } from "../Toaster/Toaster";
 import { Loadable, isLoading } from "../../lib/loadable";
 import { Loading } from "../Loading/Loading";
+
+import "./Images.scss";
 
 /**
  * Displays images for a bill.
@@ -160,11 +161,39 @@ function Image({
   };
 
   return (
-    <Box>
-      <IconButton onClick={handleDeleteClick}>
-        <HighlightOffIcon />
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      <IconButton
+        onClick={handleDeleteClick}
+        sx={{
+          display: "flex",
+          alignSelf: "end",
+          position: "absolute",
+          margin: "0.5rem",
+          padding: "0.3rem",
+
+          color: "text.primary",
+          bgcolor: "background.default",
+          opacity: 0.5,
+          transition: "opacity 0.2s",
+
+          ":hover": {
+            color: "text.primary",
+            bgcolor: "background.default",
+            opacity: 1,
+          }
+        }}
+      >
+        <DeleteForeverIcon />
       </IconButton>
-      <img src={`data:${image.mimeType};base64, ${image.base64Data}`} />
+      <img
+        src={`data:${image.mimeType};base64, ${image.base64Data}`}
+        className="bill-images-image"
+      />
     </Box>
   );
 }
