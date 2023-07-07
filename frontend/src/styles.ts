@@ -16,7 +16,14 @@ export enum ThemeMode {
   Dark = "dark",
 }
 
+const typography = {
+  fontFamily: "Noto Sans",
+};
+
+// https://coolors.co/d972ff-090c9b-ff6663-e0ff4f-fefffe
+
 const lightTheme = createTheme({
+  typography,
   palette: {
     primary: {
       main: "#0b3954",
@@ -34,6 +41,7 @@ const lightTheme = createTheme({
 });
 
 const darkTheme = createTheme({
+  typography,
   palette: {
     mode: "dark",
     primary: {

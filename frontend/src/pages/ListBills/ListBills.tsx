@@ -45,9 +45,13 @@ export function ListBills() {
         </Link>
       </div>
 
-      <div className="margin-top-1">
+      <Box
+        sx={{
+          marginTop: "1rem",
+        }}
+      >
         <BillsList />
-      </div>
+      </Box>
     </>
   );
 }
@@ -93,7 +97,7 @@ function BillsList() {
       <Table>
         <TableHead>
           <TableRow>
-            <TableCell>Name</TableCell>
+            <TableCell variant="head">Name</TableCell>
             <TableCell>Items</TableCell>
             <TableCell>People</TableCell>
             <TableCell width="10"></TableCell>

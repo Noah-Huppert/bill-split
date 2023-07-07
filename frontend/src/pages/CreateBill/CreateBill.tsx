@@ -1,8 +1,8 @@
 import { FormEvent, useState, useContext } from "react";
 import {
+  Box,
   Breadcrumbs,
   Button,
-  Card,
   CardContent,
   Paper,
   TextField,
@@ -12,7 +12,6 @@ import { Link, useNavigate } from "react-router-dom";
 
 import { trpc } from "../../trpc";
 import { ToasterCtx } from "../../components/Toaster/Toaster";
-import "./CreateBill.scss";
 import { ROUTES } from "../../routes";
 
 export function CreateBill() {
@@ -48,8 +47,19 @@ export function CreateBill() {
         <div>Create</div>
       </Breadcrumbs>
 
-      <div className="create-bill-container">
-        <Paper className="margin-top-1 create-bill-card">
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+        }}
+      >
+        <Paper
+          sx={{
+            marginTop: "1rem",
+            flexGrow: 1,
+            maxWidth: "40rem",
+          }}
+        >
           <CardContent>
             <Typography variant="h5">New Bill</Typography>
 
@@ -57,23 +67,33 @@ export function CreateBill() {
               Create a new bill. Split line items, tip, and tax.
             </Typography>
 
-            <form className="margin-top-2" onSubmit={onSubmit}>
-              <TextField
-                label="Name"
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
+            <Box
+              sx={{
+                marginTop: "2rem",
+              }}
+            >
+              <form onSubmit={onSubmit}>
+                <TextField
+                  label="Name"
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
 
-              <div className="margin-top-2">
-                <Button color="secondary" variant="contained" type="submit">
-                  Create
-                </Button>
-              </div>
-            </form>
+                <Box
+                  sx={{
+                    marginTop: "2rem",
+                  }}
+                >
+                  <Button color="secondary" variant="contained" type="submit">
+                    Create
+                  </Button>
+                </Box>
+              </form>
+            </Box>
           </CardContent>
         </Paper>
-      </div>
+      </Box>
     </>
   );
 }
