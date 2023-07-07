@@ -1,4 +1,4 @@
-import { Loadable, Loaded, newLoaded } from "./loadable";
+import { Loadable, Loaded, isLoading, newLoaded, newLoading } from "./loadable";
 
 /**
  * Data which could be loading, not found, or loaded.
@@ -42,4 +42,22 @@ export function newLoadedOrNotFound<D>(data: D | null): Loaded<D> | NotFound {
   }
 
   return newLoaded(data);
+}
+
+/**
+ * Creates a NotFoundable which when Loaded takes its value from a child key in the parent.
+ * @typeParam P Parent data type
+ * @typeParam K Keys of parent
+ * @param parent Parent NotFoundable
+ * @param key Key in Loaded parent from which Loaded data will be retrieved
+ * @returns NotFoundable which accesses a key in the parent when Loaded
+ */
+export function newNotFoundableFromKey<P, K extends keyof P>(parent: NotFoundable<P>, key: K): NotFoundable<P[K]> {
+  if (isNotFound(parent)) {
+    return newNotFound();
+  } else if (isLoading(parent)) {
+    return newLoading();
+  }
+
+  return newLoaded<P[K]>(parent.data[key]);
 }
