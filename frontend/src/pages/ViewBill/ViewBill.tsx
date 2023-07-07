@@ -5,7 +5,7 @@ import {
   useEffect,
   ReactElement,
 } from "react";
-import { Breadcrumbs, Paper, Typography } from "@mui/material";
+import { Box, Breadcrumbs, Paper, Typography } from "@mui/material";
 import { Link, useParams } from "react-router-dom";
 
 import { ROUTES } from "../../routes";
@@ -115,11 +115,18 @@ export function ViewBill() {
     <>
       <ViewBillBreadcrumbs bill={bill} />
 
-      <Images
-        onUpload={onImageUpload}
-        onDelete={onImageDelete}
-        images={billImages}
-      />
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <Images
+          onUpload={onImageUpload}
+          onDelete={onImageDelete}
+          images={billImages}
+        />
+      </Box>
     </>
   );
 }

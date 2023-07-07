@@ -22,10 +22,12 @@ import { v4 as uuidv4 } from "uuid";
 
 import { IImage } from "../../../../api/src/models/bill";
 import { ToasterCtx } from "../Toaster/Toaster";
-import { Loadable, isLoading } from "../../lib/loadable";
+import { Loadable, isLoaded, isLoading } from "../../lib/loadable";
 import { Loading } from "../Loading/Loading";
 
 import "./Images.scss";
+
+const imagesMaxWidth = "40rem";
 
 /**
  * Displays images for a bill.
@@ -42,7 +44,12 @@ export function Images({
   const [uploadMenuOpen, setUploadMenuOpen] = useState(false);
 
   return (
-    <>
+    <Box
+      sx={{
+        maxWidth: imagesMaxWidth,
+        alignSelf: "end",
+      }}
+    >
       {uploadMenuOpen && (
         <UploadImage
           onClose={() => setUploadMenuOpen(false)}
@@ -58,17 +65,38 @@ export function Images({
           paddingRight: "1rem",
         }}
       >
-        <Typography
-          variant="h6"
+        <Box
           sx={{
-            marginBottom: "1rem",
+            display: "flex",
+            justifyContent: "space-between",
           }}
         >
-          Images
-        </Typography>
+          <Typography
+            variant="h6"
+            sx={{
+              marginBottom: "1rem",
+            }}
+          >
+            Images
+          </Typography>
+
+          {isLoaded(images) && images.data.length > 0 && (
+            <IconButton onClick={() => setUploadMenuOpen(true)}>
+              <AddPhotoAlternateIcon />
+              <Typography>Add Photos</Typography>
+            </IconButton>
+          )}
+        </Box>
 
         {isLoading(images) ? (
-          <Loading />
+          <Box
+            sx={{
+              width: imagesMaxWidth,
+              padding: "10%",
+            }}
+          >
+            <Loading/>
+          </Box>
         ) : (
           <ImagesContent
             images={images.data}
@@ -78,7 +106,7 @@ export function Images({
           />
         )}
       </Paper>
-    </>
+    </Box>
   );
 }
 
@@ -98,12 +126,7 @@ function ImagesContent({
 }) {
   return (
     <>
-      {images.length > 0 ? (
-        <IconButton onClick={() => setUploadMenuOpen(true)}>
-          <AddPhotoAlternateIcon />
-          <Typography>Add Photos</Typography>
-        </IconButton>
-      ) : (
+      {images.length === 0 && (
         <UploadImage
           onClose={() => setUploadMenuOpen(false)}
           onUpload={onUpload}
@@ -482,7 +505,9 @@ function UploadImage({
           sx={{
             display: "flex",
             flexDirection: "column",
-            padding: "0.5rem",
+            //padding: "0.5rem",
+            paddingTop: "10%",
+            paddingBottom: "10%",
 
             borderStyle: "dashed",
             borderWidth: "0.1rem",
@@ -577,7 +602,6 @@ function DefaultUploadImageParent({
   return (
     <Paper
       sx={{
-        display: "inline-block",
         padding: "1rem",
         marginBottom: "1rem",
       }}
