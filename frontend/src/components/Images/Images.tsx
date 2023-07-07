@@ -12,6 +12,7 @@ import {
   Button,
   IconButton,
   LinearProgress,
+  Pagination,
   Paper,
   Typography,
 } from "@mui/material";
@@ -124,6 +125,12 @@ function ImagesContent({
   readonly onUpload: (images: ImageUploadDetails[]) => Promise<void>;
   readonly onDelete: (imageID: string) => Promise<void>;
 }) {
+  const [imageIndex, setImageIndex] = useState(1);
+
+  const handleImageChange = (e: ChangeEvent<unknown>, page: number) => {
+    setImageIndex(page);
+  };
+
   return (
     <>
       {images.length === 0 && (
@@ -141,11 +148,27 @@ function ImagesContent({
           )}
           showCloseButton={false}
         />
-      )}
+      ) || (
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            flexDirection: "column",
+            paddingBottom: "1rem",
+          }}
+        >
+          <Image image={images[imageIndex-1]} onDelete={onDelete} />
 
-      {images.map((image) => (
-        <Image key={image._id} image={image} onDelete={onDelete} />
-      ))}
+          <Pagination
+            count={images.length}
+            page={imageIndex}
+            onChange={handleImageChange}
+            sx={{
+              marginTop: "1rem",
+            }}
+          />
+        </Box>
+      )}
     </>
   );
 }
