@@ -3,7 +3,6 @@ import {
   useContext,
   useCallback,
   useEffect,
-  ReactElement,
 } from "react";
 import { Box, Breadcrumbs, Paper, Typography } from "@mui/material";
 import { Link, useParams } from "react-router-dom";

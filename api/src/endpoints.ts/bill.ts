@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { publicProcedure } from "../trpc";
-import { Bill, IBill, IImage } from "../models/bill";
+import { Bill, IBill, IImage, ILineItem } from "../models/bill";
 import { Types } from "mongoose";
 
 /**
@@ -208,6 +208,57 @@ const billDeleteImage = publicProcedure
     return newBill.images;
   });
 
+/**
+ * Adds a line item to a bill.
+ * @prop billID ID of bill
+ * @prop lineItem The new line item to add
+ * @returns The new line item. Returns null if the bill with billID doesn't exist
+ */
+const billAddLineItem = publicProcedure
+  .input(
+    z.object({
+      billID: z.string(),
+      lineItem: z.object({
+        name: z.string(),
+        price: z.number(),
+        tags: z.array(z.string()),
+        usersSplit: z.array(z.object({
+          userID: z.string(),
+          proportion: z.number(),
+        })),
+      }),
+    })
+  )
+  .mutation(async (opts): Promise<ILineItem | null> => {
+    const lineItem = {
+        ...opts.input.lineItem,
+        _id: new Types.ObjectId().toString(),
+        usersSplit: opts.input.lineItem.usersSplit.map((split) => {
+          return {
+            ...split,
+            _id: new Types.ObjectId().toString(),
+          };
+        }),
+      };
+
+    const updatedBill = await Bill.findOneAndUpdate(
+      {
+        _id: opts.input.billID,
+      },
+      {
+        lineItems: {
+          $push: lineItem,
+        }
+      }
+    );
+
+    if (updatedBill === null) {
+      return null;
+    }
+
+    return lineItem;
+  })
+
 export const endpoints = {
   billList,
   billGet,
@@ -215,4 +266,5 @@ export const endpoints = {
   billCreate,
   billUploadImages,
   billDeleteImage,
+  billAddLineItem,
 };

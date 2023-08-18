@@ -6,6 +6,7 @@ import { ILineItem } from "../../../../../api/src/models/bill";
 import { NotFoundable, isNotFound } from "../../../lib/notFoundable";
 import { isLoading } from "../../../lib/loadable";
 import { Loading } from "../../../components/Loading/Loading";
+import { LineItem } from "./LineItem";
 
 export function LineItems({
   lineItems,
@@ -19,6 +20,7 @@ export function LineItems({
           flexBasis: "66%"
         }}
       >
+
         <TableContainer>
           <Table>
             <TableHead>
@@ -45,12 +47,7 @@ export function LineItems({
                   </TableCell>
                 </TableRow>
               ) : !isNotFound(lineItems) && lineItems.data.length > 0 ? lineItems.data.map((lineItem) => (
-                  <TableRow key={lineItem._id}>
-                    <TableCell>{lineItem.name}</TableCell>
-                    <TableCell>{lineItem.price}</TableCell>
-                    <TableCell>{lineItem.tags}</TableCell>
-                    <TableCell>{JSON.stringify(lineItem.usersSplit)}</TableCell>
-                  </TableRow>
+                  <LineItem key={lineItem._id} lineItem={lineItem} />
               )) : (
                 <TableRow>
                   <TableCell
