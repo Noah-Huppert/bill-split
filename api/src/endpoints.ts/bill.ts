@@ -39,7 +39,7 @@ export interface IBillWithoutImages extends Omit<IBill, "images"> {}
 /**
  * Line item fields, except ID, represented by Zod.
  */
-const ZLineItemWithoutID = {
+const ZLineItemWithoutID = z.object({
   name: z.string(),
   price: z.number(),
   tags: z.array(z.string()),
@@ -47,7 +47,7 @@ const ZLineItemWithoutID = {
     userID: z.string(),
     proportion: z.number(),
   })),
-};
+});
 
 /**
  * Summary of available bills.
@@ -223,29 +223,51 @@ const billDeleteImage = publicProcedure
   });
 
 /**
+ * Response to adding a line item.
+ */
+export interface IAddLineItemResponse {
+  /**
+   * Updated bill with new line item.
+   */
+  bill: IBill
+  
+  /**
+   * New line item specifically added.
+   */
+  lineItem: ILineItem
+}
+
+/**
  * Adds a line item to a bill.
  * @prop billID ID of bill
- * @prop lineItem The new line item to add
+ * @prop lineItem The new line item to add, if null initializes empty line item
  * @returns The new line item. Returns null if the bill with billID doesn't exist
  */
 const billAddLineItem = publicProcedure
   .input(
     z.object({
       billID: z.string(),
-      lineItem: z.object(ZLineItemWithoutID),
+      lineItem: z.nullable(ZLineItemWithoutID),
     })
   )
-  .mutation(async (opts): Promise<ILineItem | null> => {
+  .mutation(async (opts): Promise<IAddLineItemResponse | null> => {
+    const inputLineItem = opts.input.lineItem || {
+      name: "",
+      price: 0,
+      tags: [],
+      usersSplit: [],
+    };
+
     const lineItem = {
-        ...opts.input.lineItem,
-        _id: new Types.ObjectId().toString(),
-        usersSplit: opts.input.lineItem.usersSplit.map((split) => {
-          return {
-            ...split,
-            _id: new Types.ObjectId().toString(),
-          };
-        }),
-      };
+      ...inputLineItem,
+      _id: new Types.ObjectId().toString(),
+      usersSplit: inputLineItem.usersSplit.map((split) => {
+        return {
+          ...split,
+          _id: new Types.ObjectId().toString(),
+        };
+      }),
+    };
 
     const updatedBill = await Bill.findOneAndUpdate(
       {
@@ -262,15 +284,23 @@ const billAddLineItem = publicProcedure
       return null;
     }
 
-    return lineItem;
+    return {
+      bill: updatedBill,
+      lineItem,
+    };
   });
 
+/**
+ * Update a line item in the bill.
+ * @prop billID ID of the bill in which to update the line item
+ * @prop lineItem The new line item values
+ * @returns Updated line item, or null if the bill or line item could not be found
+ */
 const billUpdateLineItem = publicProcedure
   .input(
     z.object({
       billID: z.string(),
-      lineItem: z.object({
-        ...ZLineItemWithoutID,
+      lineItem: ZLineItemWithoutID.extend({
         _id: z.string(),
       }),
     })
@@ -294,7 +324,7 @@ const billUpdateLineItem = publicProcedure
     const matchedLineItems = updatedBill.lineItems.filter((lineItem) => lineItem._id === opts.input.lineItem._id);
     if (matchedLineItems.length > 1) {
       // There should only ever be one line item with an _id in the array
-      console.error(`More than one line item with the same ID found for bill '${opts.input.billID}`: `${matchedLineItems}`);
+      console.error(`More than one line item with the same ID found for bill '${opts.input.billID}: ${matchedLineItems}`);
 
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
