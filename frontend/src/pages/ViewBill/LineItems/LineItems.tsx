@@ -22,10 +22,12 @@ export function LineItems({
       throw new Error("Line item not updated because Bill not loaded");
     }
 
+    // Update line item
     const updatedLineItem = await trpc.billUpdateLineItem.mutate({
       billID: billID.data,
       lineItem,
     });
+    
     if (updatedLineItem === null) {
       throw new Error("Line item could not be found to update");
     }

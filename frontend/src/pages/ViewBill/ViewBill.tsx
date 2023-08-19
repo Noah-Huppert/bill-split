@@ -4,7 +4,7 @@ import {
   useCallback,
   useEffect,
 } from "react";
-import { Box, Breadcrumbs, Paper, Typography } from "@mui/material";
+import { Box, Breadcrumbs, Button, Paper, Typography } from "@mui/material";
 import { Link, useParams } from "react-router-dom";
 
 import { ROUTES } from "../../routes";
@@ -13,7 +13,7 @@ import { ToasterCtx } from "../../components/Toaster/Toaster";
 import { IBill, IImage } from "../../../../api/src/models/bill";
 import { ImageUploadDetails, Images } from "./Images/Images";
 import { IBillWithoutImages } from "../../../../api/src/endpoints.ts/bill";
-import { isLoaded, newLoading } from "../../lib/loadable";
+import { isLoaded, isLoading, newLoading } from "../../lib/loadable";
 import {
   NotFoundable,
   isNotFound,
@@ -22,6 +22,7 @@ import {
   newNotFoundableFromKey,
 } from "../../lib/notFoundable";
 import { LineItems } from "./LineItems/LineItems";
+import { isErrored } from "stream";
 
 export function ViewBill() {
   const { id } = useParams();
@@ -53,6 +54,7 @@ export function ViewBill() {
     setBillImages(newLoadedOrNotFound(await trpc.billGetImages.query({ id })));
   }, [setBillImages, newLoadedOrNotFound]);
 
+  // Get bill when component loads
   useEffect(() => {
     fetchBill().catch((e) => {
       toast({
@@ -67,6 +69,7 @@ export function ViewBill() {
     });
   }, [fetchBill, toast, setBill]);
 
+  // Get bill images when component loads
   useEffect(() => {
     fetchBillImages().catch((e) => {
       toast({
@@ -112,6 +115,24 @@ export function ViewBill() {
     );
   }
 
+  const onAddLineItem = async (): Promise<void> => {
+    // Can't add line item if bill is loading
+    if (isLoading(bill)) {
+      return;
+    }
+    
+    const newLineItem = await trpc.billAddLineItem.mutate({
+      billID: bill.data._id,
+      lineItem: null,
+    });
+
+    if (newLineItem === null) {
+      throw new Error("Failed to add new line item because bill doesn't exist");
+    }
+
+    setBill(newLoadedOrNotFound(newLineItem.bill));
+  };
+
   return (
     <>
       <ViewBillBreadcrumbs bill={bill} />
@@ -123,6 +144,11 @@ export function ViewBill() {
           justifyContent: "space-between",
         }}
       >
+        <Button
+          onClick={onAddLineItem}
+        >
+          Add Line Item
+        </Button>
         <LineItems
           billID={newNotFoundableFromKey(bill, "_id")}
           lineItems={newNotFoundableFromKey(bill, "lineItems")}
