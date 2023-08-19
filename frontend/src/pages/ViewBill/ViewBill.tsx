@@ -4,7 +4,8 @@ import {
   useCallback,
   useEffect,
 } from "react";
-import { Box, Breadcrumbs, Button, Paper, Typography } from "@mui/material";
+import { Box, Breadcrumbs, Button, IconButton, Paper, Typography } from "@mui/material";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { Link, useParams } from "react-router-dom";
 
 import { ROUTES } from "../../routes";
@@ -22,7 +23,6 @@ import {
   newNotFoundableFromKey,
 } from "../../lib/notFoundable";
 import { LineItems } from "./LineItems/LineItems";
-import { isErrored } from "stream";
 
 export function ViewBill() {
   const { id } = useParams();
@@ -144,15 +144,34 @@ export function ViewBill() {
           justifyContent: "space-between",
         }}
       >
-        <Button
-          onClick={onAddLineItem}
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+          }}
         >
-          Add Line Item
-        </Button>
-        <LineItems
-          billID={newNotFoundableFromKey(bill, "_id")}
-          lineItems={newNotFoundableFromKey(bill, "lineItems")}
-        />
+          <Button
+            sx={{
+              display: "flex",
+              maxWidth: "20rem",
+              alignSelf: "end",
+              marginBottom: "1rem",
+            }}
+            variant="contained"
+            onClick={onAddLineItem}
+          >
+            <AddCircleOutlineIcon
+              sx={{
+                marginRight: "1rem",
+              }}
+            />
+            Line Item
+          </Button>
+          <LineItems
+            billID={newNotFoundableFromKey(bill, "_id")}
+            lineItems={newNotFoundableFromKey(bill, "lineItems")}
+          />
+        </Box>
         <Images
           onUpload={onImageUpload}
           onDelete={onImageDelete}
