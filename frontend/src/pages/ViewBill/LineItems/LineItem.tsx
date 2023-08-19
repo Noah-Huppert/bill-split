@@ -1,55 +1,37 @@
 import { useState } from "react";
 import { ILineItem } from "../../../../../api/src/models/bill";
-import { Button, TableCell, TableRow } from "@mui/material";
+import { TextField, TableCell, TableRow } from "@mui/material";
 
 export function LineItem({
   lineItem,
+  onUpdate,
 }: {
   readonly lineItem: ILineItem,
+  readonly onUpdate: (lineItem: ILineItem) => Promise<void>,
 }) {
-  const [editMode, setEditMode] = useState(false);
+  const [localLineItem, setLocalLineItem] = useState(lineItem);
 
-  const onViewModeClick = () => {
-    setEditMode(true);
+  const localOnUpdate = async (updatedLineItem: ILineItem): Promise<void> => {
+    // Send update to server
+    await onUpdate(updatedLineItem);
+
+    // Once successfully updated use new version of parent's line item
+    setLocalLineItem(lineItem);
   };
 
-  if (editMode === false) {
-    return (
-      <Button onClick={onViewModeClick}>
-        <LineItemViewMode lineItem={lineItem} />
-      </Button>
-    );
-  }
-
-
-}
-
-function LineItemEditMode({
-  initialLineItem: ILineItem,
-  onSave,
-}: {
-  readonly onSave: (lineItem: ILineItem) => Promise<void>
-}) {
   return (
     <TableRow>
-      <TableCell>{lineItem.name}</TableCell>
-      <TableCell>{lineItem.price}</TableCell>
-      <TableCell>{lineItem.tags}</TableCell>
-      <TableCell>{JSON.stringify(lineItem.usersSplit)}</TableCell>
-    </TableRow>
-  );
-}
-
-function LineItemViewMode({
-  lineItem,
-}: {
-  readonly lineItem: ILineItem,
-}) {
-  return (
-    <TableRow>
-      <TableCell>{lineItem.name}</TableCell>
-      <TableCell>{lineItem.price}</TableCell>
-      <TableCell>{lineItem.tags}</TableCell>
+      <TableCell>
+        <TextField
+          value={localLineItem.name}
+          onChange={(e) => localOnUpdate({
+            ...localLineItem,
+            name: e.target.value,
+          })}
+        />
+      </TableCell>
+      <TableCell>{localLineItem.price}</TableCell>
+      <TableCell>{localLineItem.tags}</TableCell>
       <TableCell>{JSON.stringify(lineItem.usersSplit)}</TableCell>
     </TableRow>
   );
