@@ -123,7 +123,10 @@ export function ViewBill() {
           justifyContent: "space-between",
         }}
       >
-        <LineItems lineItems={newNotFoundableFromKey(bill, "lineItems")} />
+        <LineItems
+          billID={newNotFoundableFromKey(bill, "_id")}
+          lineItems={newNotFoundableFromKey(bill, "lineItems")}
+        />
         <Images
           onUpload={onImageUpload}
           onDelete={onImageDelete}

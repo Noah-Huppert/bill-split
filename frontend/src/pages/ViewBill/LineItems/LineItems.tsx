@@ -4,15 +4,34 @@ import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 
 import { ILineItem } from "../../../../../api/src/models/bill";
 import { NotFoundable, isNotFound } from "../../../lib/notFoundable";
-import { isLoading } from "../../../lib/loadable";
+import { isLoaded, isLoading } from "../../../lib/loadable";
 import { Loading } from "../../../components/Loading/Loading";
 import { LineItem } from "./LineItem";
+import { trpc } from "../../../trpc";
 
 export function LineItems({
+  billID,
   lineItems,
 }: {
+  readonly billID: NotFoundable<string>,
   readonly lineItems: NotFoundable<ILineItem[]>,
 }) {
+  const doUpdateLineItem = async (lineItem: ILineItem): Promise<ILineItem> => {
+    // Bill not loaded
+    if (!isLoaded(billID)) {
+      throw new Error("Line item not updated because Bill not loaded");
+    }
+
+    const updatedLineItem = await trpc.billUpdateLineItem.mutate({
+      billID: billID.data,
+      lineItem,
+    });
+    if (updatedLineItem === null) {
+      throw new Error("Line item could not be found to update");
+    }
+    return updatedLineItem;
+  };
+
   return (
     <>
       <Paper
@@ -47,7 +66,11 @@ export function LineItems({
                   </TableCell>
                 </TableRow>
               ) : !isNotFound(lineItems) && lineItems.data.length > 0 ? lineItems.data.map((lineItem) => (
-                  <LineItem key={lineItem._id} lineItem={lineItem} />
+                  <LineItem
+                    key={lineItem._id}
+                    lineItem={lineItem}
+                    remoteUpdate={doUpdateLineItem}
+                  />
               )) : (
                 <TableRow>
                   <TableCell
