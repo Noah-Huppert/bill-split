@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { TRPCError } from "@trpc/server";
 import { publicProcedure } from "../trpc";
 import { Bill, IBill, IImage, ILineItem } from "../models/bill";
 import { Types } from "mongoose";
@@ -34,6 +35,19 @@ export interface IBillSummary {
  * Omitted because image data could be large.
  */
 export interface IBillWithoutImages extends Omit<IBill, "images"> {}
+
+/**
+ * Line item fields, except ID, represented by Zod.
+ */
+const ZLineItemWithoutID = {
+  name: z.string(),
+  price: z.number(),
+  tags: z.array(z.string()),
+  usersSplit: z.array(z.object({
+    userID: z.string(),
+    proportion: z.number(),
+  })),
+};
 
 /**
  * Summary of available bills.
@@ -218,15 +232,7 @@ const billAddLineItem = publicProcedure
   .input(
     z.object({
       billID: z.string(),
-      lineItem: z.object({
-        name: z.string(),
-        price: z.number(),
-        tags: z.array(z.string()),
-        usersSplit: z.array(z.object({
-          userID: z.string(),
-          proportion: z.number(),
-        })),
-      }),
+      lineItem: z.object(ZLineItemWithoutID),
     })
   )
   .mutation(async (opts): Promise<ILineItem | null> => {
@@ -257,7 +263,51 @@ const billAddLineItem = publicProcedure
     }
 
     return lineItem;
-  })
+  });
+
+const billUpdateLineItem = publicProcedure
+  .input(
+    z.object({
+      billID: z.string(),
+      lineItem: z.object({
+        ...ZLineItemWithoutID,
+        _id: z.string(),
+      }),
+    })
+  )
+  .mutation(async (opts): Promise<ILineItem | null> => {
+    const updatedBill = await Bill.findOneAndUpdate({
+      _id: opts.input.billID,
+      "lineItems._id": opts.input.lineItem._id,
+    }, {
+      $set: {
+        "lineItems.$": opts.input.lineItem,
+      },
+    }, {
+      new: true,
+    });
+
+    if (updatedBill === null) {
+      return null;
+    }
+
+    const matchedLineItems = updatedBill.lineItems.filter((lineItem) => lineItem._id === opts.input.lineItem._id);
+    if (matchedLineItems.length > 1) {
+      // There should only ever be one line item with an _id in the array
+      console.error(`More than one line item with the same ID found for bill '${opts.input.billID}`: `${matchedLineItems}`);
+
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "An internal error occurred",
+      });
+    } else if (matchedLineItems.length == 1) {
+      // Updated successfully
+      return matchedLineItems[0];
+    } else {
+      // Line item not found
+      return null;
+    }
+  });
 
 export const endpoints = {
   billList,
@@ -267,4 +317,5 @@ export const endpoints = {
   billUploadImages,
   billDeleteImage,
   billAddLineItem,
+  billUpdateLineItem,
 };
