@@ -274,9 +274,9 @@ const billAddLineItem = publicProcedure
         _id: opts.input.billID,
       },
       {
-        lineItems: {
-          $push: lineItem,
-        }
+        $push: {
+          lineItems: lineItem,
+        },
       }
     );
 
@@ -321,7 +321,7 @@ const billUpdateLineItem = publicProcedure
       return null;
     }
 
-    const matchedLineItems = updatedBill.lineItems.filter((lineItem) => lineItem._id === opts.input.lineItem._id);
+    const matchedLineItems = updatedBill.lineItems.filter((lineItem) => lineItem._id.toString() === opts.input.lineItem._id);
     if (matchedLineItems.length > 1) {
       // There should only ever be one line item with an _id in the array
       console.error(`More than one line item with the same ID found for bill '${opts.input.billID}: ${matchedLineItems}`);
