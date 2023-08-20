@@ -24,7 +24,7 @@ export function LineItem({
     setLocalLineItem(newLineItem);
   };
 
-  useEffect(() => {
+  /* useEffect(() => {
     // Send updates about local line item to server
     doUpdate(debouncedLocalLineItem).catch((e) => toast({
       _tag: "error",
@@ -33,14 +33,14 @@ export function LineItem({
         systemError: e.toString(),
       },
     }));
-  }, [debouncedLocalLineItem]);
+  }, [debouncedLocalLineItem]); */
 
   return (
     <TableRow>
       <TableCell>
         <TextField
           value={localLineItem.name}
-          onChange={(e) => setLocalLineItem({
+          onChange={(e) => doUpdate({
             ...localLineItem,
             name: e.target.value,
           })}

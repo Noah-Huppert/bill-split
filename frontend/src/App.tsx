@@ -1,9 +1,11 @@
 import "react";
 import { createHashRouter, RouterProvider } from "react-router-dom";
 import { CssBaseline, ThemeProvider } from "@mui/material";
+import { Provider as ReduxProvider } from "react-redux";
 
 import "./styles";
 
+import { store } from "./store";
 import { ListBills } from "./pages/ListBills/ListBills";
 import { ErrorBoundary } from "./components/ErrorBoundary/ErrorBoundary";
 import { CreateBill } from "./pages/CreateBill/CreateBill";
@@ -52,13 +54,16 @@ export function App() {
   const theme = useTheme()[0];
 
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <ErrorBoundary>
-        <Toaster>
-          <RouterProvider router={router}></RouterProvider>
-        </Toaster>
-      </ErrorBoundary>
-    </ThemeProvider>
+
+    <ErrorBoundary>
+      <ReduxProvider store={store}>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+            <Toaster>
+              <RouterProvider router={router}></RouterProvider>
+            </Toaster>
+        </ThemeProvider>
+      </ReduxProvider>
+    </ErrorBoundary>
   );
 }
