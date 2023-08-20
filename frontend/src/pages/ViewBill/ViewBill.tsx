@@ -1,10 +1,9 @@
 import {
-  useState,
   useContext,
   useCallback,
   useEffect,
 } from "react";
-import { Box, Breadcrumbs, Button, IconButton, Paper, Typography } from "@mui/material";
+import { Box, Breadcrumbs, Button, Typography } from "@mui/material";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { Link, useParams } from "react-router-dom";
 
@@ -23,8 +22,14 @@ import {
   newNotFoundableFromKey,
 } from "../../lib/notFoundable";
 import { LineItems } from "./LineItems/LineItems";
+import { fetchBill, fetchBillImages } from "../../store/bills/actions";
+import { selectBillByID, selectBillImagesByID } from "../../store/bills/selectors";
+import { useDispatch, useSelector } from "react-redux";
+import { State } from "../../store";
 
 export function ViewBill() {
+  const dispatch = useDispatch();
+
   const { id } = useParams();
   const toast = useContext(ToasterCtx);
 
@@ -39,24 +44,42 @@ export function ViewBill() {
     return;
   }
 
-  const [bill, setBill] = useState<NotFoundable<IBillWithoutImages>>(
-    newLoading()
-  );
-  const [billImages, setBillImages] = useState<NotFoundable<IImage[]>>(
-    newLoading()
-  );
+  const bill = useSelector<State>(state => selectBillByID(state, id));
+  const billImages = useSelector<State>(state => selectBillImagesByID(state, id));
 
-  const fetchBill = useCallback(async () => {
-    setBill(newLoadedOrNotFound(await trpc.billGet.query({ id })));
-  }, [setBill, newLoadedOrNotFound]);
+  const doFetchBill = useCallback(async () => {
+    dispatch(fetchBill({
+      billID: id,
+      bill: newLoading(),
+    }));
 
-  const fetchBillImages = useCallback(async () => {
-    setBillImages(newLoadedOrNotFound(await trpc.billGetImages.query({ id })));
-  }, [setBillImages, newLoadedOrNotFound]);
+    const bill = newLoadedOrNotFound(await trpc.billGet.query({ id }));
+
+    dispatch(fetchBill({
+      billID: id,
+      bill,
+    }))
+
+
+  }, [dispatch, fetchBill, id, newLoadedOrNotFound]);
+
+  const doFetchBillImages = useCallback(async () => {
+    dispatch(fetchBillImages({
+      billID: id,
+      images: newLoading(),
+    }));
+
+    const images = newLoadedOrNotFound(await trpc.billGetImages.query({ id }));
+
+    dispatch(fetchBillImages({
+      billID: id,
+      images,
+    }));
+  }, [dispatch, fetchBillImages, id, newLoadedOrNotFound]);
 
   // Get bill when component loads
   useEffect(() => {
-    fetchBill().catch((e) => {
+    doFetchBill().catch((e) => {
       toast({
         _tag: "error",
         error: {
@@ -67,11 +90,11 @@ export function ViewBill() {
 
       setBill(newNotFound());
     });
-  }, [fetchBill, toast, setBill]);
+  }, [doFetchBill, toast, setBill]);
 
   // Get bill images when component loads
   useEffect(() => {
-    fetchBillImages().catch((e) => {
+    doFetchBillImages().catch((e) => {
       toast({
         _tag: "error",
         error: {
@@ -82,7 +105,7 @@ export function ViewBill() {
 
       setBillImages(newNotFound());
     });
-  }, [fetchBillImages, toast, setBillImages]);
+  }, [doFetchBillImages, toast, setBillImages]);
 
   const onImageUpload = async (images: ImageUploadDetails[]): Promise<void> => {
     setBillImages(

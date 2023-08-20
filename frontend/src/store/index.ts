@@ -1,7 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { billsSlice } from "./bills";
+import { billsSlice, BillsState } from "./bills";
 
-export const store = configureStore({
+export type State = {
+  bills: BillsState,
+}
+
+export const store = configureStore<State>({
   reducer: {
     bills: billsSlice.reducer,
   }
