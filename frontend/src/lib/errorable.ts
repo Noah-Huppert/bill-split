@@ -1,39 +1,52 @@
-import { Loadable } from "./loadable";
-import { NotFoundable } from "./notFoundable";
+import { Either, Left, Right, isLeft, isRight, left, right } from "fp-ts/lib/Either";
 
 /**
- * Indicates loading data failed.
+ * Data which can either be in an error state or a success state.
+ * @typeParam F Error data type
+ * @typeParam S Success data type
  */
-export type Errored = {
-  _tag: "error",
-};
-
-export type ErrorableData = {
-  _tag: string,
-};
+export type Errorable<F, S> = Either<F, S>;
 
 /**
- * Data type which can encounter error loading.
- * @typeParam D Type of data when loaded
+ * Indicates data is an error state.
+ * @typeParam F Error data type
  */
-export type Errorable<D extends ErrorableData> = Errored | D;
+export type Errored<F> = Left<F>;
 
 /**
- * Creates a new Errored.
- * @returns New Errored
+ * Indicates data is a success state.
+ * @typeParam S Success data type
  */
-function newErrored(): Errored {
-  return {
-    _tag: "error",
-  };
-}
+export type Success<S> = Right<S>;
 
 /**
- * Type guard for Errored.
- * @typeParam D Data type
- * @param errorable To check
- * @returns True if Errored
+ * Create a new errored state of an Errorable.
+ * @typeParam F Error data type
+ * @typeParam S Success data type
+ * @param error Error data
+ * @returns New error state errorable
  */
-function isErrored<D extends ErrorableData>(errorable: Errorable<D>): errorable is Errored {
-  return errorable._tag === "error";
-}
+export const newErrored = <F, S,>(error: F): Errorable<F, S> => left(error);
+
+/**
+ * Create a new success state of an Errorable.
+ * @typeParam F Error data type
+ * @typeParam S Success data type
+ * @param success Success data
+ * @returns New success state errorable
+ */
+export const newSuccess = <F, S,>(success: S): Errorable<F, S> => right(success);
+
+/**
+ * Type guard to determine if errorable is an error.
+ * @typeParam F Error data type
+ * @typeParam S Success data type
+ */
+export const isErrored = <F, S,>(e: Errorable<F, S>): e is Errored<F> => isLeft(e);
+
+/**
+ * Type guard to determine if errorable is a success.
+ * @typeParam F Error data type
+ * @typeParam S Success data type
+ */
+export const isSuccess = <F, S,>(e: Errorable<F, S>): e is Success<S> => isRight(u);
