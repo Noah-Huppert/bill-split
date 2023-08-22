@@ -26,6 +26,7 @@ import { fetchBill, fetchBillImages } from "../../store/bills/actions";
 import { selectBillByID, selectBillImagesByID } from "../../store/bills/selectors";
 import { useDispatch, useSelector } from "react-redux";
 import { State } from "../../store";
+import { Errorable, isErrored, isSuccess, newErrored, newSuccess, resolveSuccessOrErrored } from "../../lib/errorable";
 
 export function ViewBill() {
   const dispatch = useDispatch();
@@ -44,92 +45,70 @@ export function ViewBill() {
     return;
   }
 
-  const bill = useSelector<State>(state => selectBillByID(state, id));
-  const billImages = useSelector<State>(state => selectBillImagesByID(state, id));
+  const bill = useSelector((state: State) => selectBillByID(state, id));
+  const billImages = useSelector((state: State) => selectBillImagesByID(state, id));
 
   const doFetchBill = useCallback(async () => {
+    // Set loading
     dispatch(fetchBill({
       billID: id,
-      bill: newLoading(),
+      bill: newSuccess(newLoading()),
     }));
 
-    const bill = newLoadedOrNotFound(await trpc.billGet.query({ id }));
-
     dispatch(fetchBill({
       billID: id,
-      bill,
-    }))
-
-
+      bill: await resolveSuccessOrErrored(async () => newLoadedOrNotFound(await trpc.billGet.query({ id }))),
+    }));
   }, [dispatch, fetchBill, id, newLoadedOrNotFound]);
 
   const doFetchBillImages = useCallback(async () => {
+    // Set loading
     dispatch(fetchBillImages({
       billID: id,
-      images: newLoading(),
+      images: newSuccess(newLoading()),
     }));
 
-    const images = newLoadedOrNotFound(await trpc.billGetImages.query({ id }));
-
     dispatch(fetchBillImages({
       billID: id,
-      images,
+      images: await resolveSuccessOrErrored(async () => newLoadedOrNotFound(await trpc.billGetImages.query({ id }))),
     }));
   }, [dispatch, fetchBillImages, id, newLoadedOrNotFound]);
 
   // Get bill when component loads
   useEffect(() => {
-    doFetchBill().catch((e) => {
-      toast({
-        _tag: "error",
-        error: {
-          userError: "Failed to get bill",
-          systemError: e,
-        },
-      });
-
-      setBill(newNotFound());
-    });
-  }, [doFetchBill, toast, setBill]);
+    doFetchBill();
+  }, [doFetchBill]);
 
   // Get bill images when component loads
   useEffect(() => {
-    doFetchBillImages().catch((e) => {
-      toast({
-        _tag: "error",
-        error: {
-          userError: "Failed to get bill images",
-          systemError: e,
-        },
-      });
-
-      setBillImages(newNotFound());
-    });
-  }, [doFetchBillImages, toast, setBillImages]);
+    doFetchBillImages();
+  }, [doFetchBillImages]);
 
   const onImageUpload = async (images: ImageUploadDetails[]): Promise<void> => {
-    setBillImages(
-      newLoadedOrNotFound(
+    dispatch(fetchBillImages({
+      billID: id,
+      images: await resolveSuccessOrErrored(async () => newLoadedOrNotFound(
         await trpc.billUploadImages.mutate({
           id: id,
           images: images,
         })
-      )
-    );
+      ))
+    }));
   };
 
   const onImageDelete = async (imageID: string): Promise<void> => {
-    setBillImages(
-      newLoadedOrNotFound(
+    dispatch(fetchBillImages({
+      billID: id,
+      images: await resolveSuccessOrErrored(async () => newLoadedOrNotFound(
         await trpc.billDeleteImage.mutate({
           billID: id,
           imageID: imageID,
         })
-      )
-    );
+      ))
+    }));
   };
 
-  if (isNotFound(bill) || isNotFound(billImages)) {
+  if ((isSuccess(bill) && isNotFound(bill)) || isNotFound(billImages)) {
     return (
       <>
         <ViewBillBreadcrumbs bill={bill} />
@@ -139,22 +118,45 @@ export function ViewBill() {
   }
 
   const onAddLineItem = async (): Promise<void> => {
-    // Can't add line item if bill is loading
-    if (isLoading(bill)) {
+    // Can't add line item if bill is loading or failed to load
+    if (isErrored(bill) || isLoading(bill.data)) {
       return;
     }
     
-    const newLineItem = await trpc.billAddLineItem.mutate({
-      billID: bill.data._id,
-      lineItem: null,
-    });
-
-    if (newLineItem === null) {
-      throw new Error("Failed to add new line item because bill doesn't exist");
-    }
-
-    setBill(newLoadedOrNotFound(newLineItem.bill));
+    dispatch(fetchBill({
+      billID: id,
+      bill: await resolveSuccessOrErrored(async () => newLoadedOrNotFound(await trpc.billAddLineItem.mutate({
+        billID: id,
+        lineItem: null,
+      }))),
+    }));
   };
+
+  if (isErrored(bill)) {
+    console.error(`Error loading bill ${id}: ${bill.error}`);
+
+    return (
+      <>
+        <ViewBillBreadcrumbs bill={bill} />
+
+        <Typography variant="h1">
+          Error loading bill
+        </Typography>
+      </>
+    )
+  }
+
+  if (isNotFound(bill.data)) {
+    return (
+      <>
+        <ViewBillBreadcrumbs bill={bill} />
+
+        <Typography variant="h1">
+          Bill not found
+        </Typography>
+      </>
+    )
+  }
 
   return (
     <>
@@ -190,10 +192,7 @@ export function ViewBill() {
             />
             Line Item
           </Button>
-          <LineItems
-            billID={newNotFoundableFromKey(bill, "_id")}
-            lineItems={newNotFoundableFromKey(bill, "lineItems")}
-          />
+          <LineItems bill={bill.data} />
         </Box>
         <Images
           onUpload={onImageUpload}
@@ -208,7 +207,7 @@ export function ViewBill() {
 function ViewBillBreadcrumbs({
   bill,
 }: {
-  readonly bill: NotFoundable<IBillWithoutImages>;
+  readonly bill: Errorable<Error, NotFoundable<IBillWithoutImages>>;
 }) {
   return (
     <Breadcrumbs
@@ -217,7 +216,7 @@ function ViewBillBreadcrumbs({
       }}
     >
       <Link to={ROUTES.bills.list}>Bills</Link>
-      <div>{!isLoaded(bill) ? "..." : bill.data.name}</div>
+      <div>{isSuccess(bill) && isLoaded(bill.data) ? bill.data.data.name : "..."}</div>
     </Breadcrumbs>
   );
 }

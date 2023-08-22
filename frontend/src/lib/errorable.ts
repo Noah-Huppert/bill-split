@@ -64,3 +64,11 @@ export const isErrored = <F, S,>(e: Errorable<F, S>): e is Errored<F> => e._tag 
  * @typeParam S Success data type
  */
 export const isSuccess = <F, S,>(e: Errorable<F, S>): e is Success<S> => e._tag === "success";
+
+export async function resolveSuccessOrErrored<S>(func: () => Promise<S>): Promise<Errorable<Error, S>> {
+  try {
+    return newSuccess(await func());
+  } catch (e) {
+    return newErrored(new Error(`${e}`));
+  }
+}

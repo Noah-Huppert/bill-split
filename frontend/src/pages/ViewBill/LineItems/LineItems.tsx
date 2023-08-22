@@ -4,36 +4,18 @@ import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 
 import { ILineItem } from "../../../../../api/src/models/bill";
 import { NotFoundable, isNotFound } from "../../../lib/notFoundable";
-import { isLoaded, isLoading } from "../../../lib/loadable";
+import { Loadable, isLoaded, isLoading } from "../../../lib/loadable";
 import { Loading } from "../../../components/Loading/Loading";
 import { LineItem } from "./LineItem";
 import { trpc } from "../../../trpc";
+import { IBillWithoutImages } from "../../../../../api/src/endpoints.ts/bill";
+import { Errorable, isErrored } from "../../../lib/errorable";
 
 export function LineItems({
-  billID,
-  lineItems,
+  bill,
 }: {
-  readonly billID: NotFoundable<string>,
-  readonly lineItems: NotFoundable<ILineItem[]>,
+  readonly bill: Loadable<IBillWithoutImages>
 }) {
-  const doUpdateLineItem = async (lineItem: ILineItem): Promise<ILineItem> => {
-    // Bill not loaded
-    if (!isLoaded(billID)) {
-      throw new Error("Line item not updated because Bill not loaded");
-    }
-
-    // Update line item
-    const updatedLineItem = await trpc.billUpdateLineItem.mutate({
-      billID: billID.data,
-      lineItem,
-    });
-    
-    if (updatedLineItem === null) {
-      throw new Error("Line item could not be found to update");
-    }
-    return updatedLineItem;
-  };
-
   return (
     <>
       <Paper
@@ -55,61 +37,94 @@ export function LineItems({
 
             
             <TableBody>
-              {isLoading(lineItems) ? (
-                <TableRow>
-                  <TableCell
-                    colSpan={4}
-                    sx={{
-                      borderBottom: "none",
-                      padding: "10%",
-                    }}
-                  >
-                    <Loading/>
-                  </TableCell>
-                </TableRow>
-              ) : !isNotFound(lineItems) && lineItems.data.length > 0 ? lineItems.data.map((lineItem) => (
-                  <LineItem
-                    key={lineItem._id}
-                    lineItem={lineItem}
-                    remoteUpdate={doUpdateLineItem}
-                  />
-              )) : (
-                <TableRow>
-                  <TableCell
-                    colSpan={4}
-                    sx={{
-                      borderBottom: "none",
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          display: "flex",
-                          flexDirection: "column",
-                          alignItems: "center",
-                          color: "text.default",
-                        }}
-                      >
-                        <ReceiptLongIcon
-                          sx={{
-                            fontSize: "6rem",
-                          }}
-                        />
-                        <Typography variant="h6">No Line Items</Typography>
-                      </Box>
-                    </Box>
-                  </TableCell>
-                </TableRow>
-              )}
-              </TableBody>
+              <LineItemsBody bill={bill} />
+            </TableBody>
           </Table>
         </TableContainer>
       </Paper>
     </>
   );
+}
+
+function LineItemsBody({
+  bill,
+}: {
+  readonly bill: Loadable<IBillWithoutImages>,
+}) {
+  if (isLoading(bill)) {
+    return (
+      <TableRow>
+        <TableCell
+          colSpan={4}
+          sx={{
+            borderBottom: "none",
+            padding: "10%",
+          }}
+        >
+          <Loading/>
+        </TableCell>
+      </TableRow>
+    )
+  }
+
+  if (bill.data.lineItems.length === 0) {
+    return (
+      <TableRow>
+        <TableCell
+          colSpan={4}
+          sx={{
+            borderBottom: "none",
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                color: "text.default",
+              }}
+            >
+              <ReceiptLongIcon
+                sx={{
+                  fontSize: "6rem",
+                }}
+              />
+              <Typography variant="h6">No Line Items</Typography>
+            </Box>
+          </Box>
+        </TableCell>
+      </TableRow>
+    )
+  }
+
+  const doUpdateLineItem = async (lineItem: ILineItem): Promise<ILineItem> => {
+    // Update line item
+    const updatedLineItem = await trpc.billUpdateLineItem.mutate({
+      billID: bill.data._id,
+      lineItem,
+    });
+    
+    if (updatedLineItem === null) {
+      throw new Error("Line item could not be found to update");
+    }
+    return updatedLineItem;
+  };
+
+  return (
+    <>
+      {bill.data.lineItems.map((lineItem) => (
+        <LineItem
+          key={lineItem._id}
+          lineItem={lineItem}
+          remoteUpdate={doUpdateLineItem}
+        />
+      ))}
+    </>
+  )
 }

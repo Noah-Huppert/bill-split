@@ -229,7 +229,7 @@ export interface IAddLineItemResponse {
   /**
    * Updated bill with new line item.
    */
-  bill: IBill
+  bill: IBillWithoutImages
   
   /**
    * New line item specifically added.
@@ -250,7 +250,7 @@ const billAddLineItem = publicProcedure
       lineItem: z.nullable(ZLineItemWithoutID),
     })
   )
-  .mutation(async (opts): Promise<IAddLineItemResponse | null> => {
+  .mutation(async (opts): Promise<IBillWithoutImages | null> => {
     const inputLineItem = opts.input.lineItem || {
       name: "",
       price: 0,
@@ -277,6 +277,10 @@ const billAddLineItem = publicProcedure
         $push: {
           lineItems: lineItem,
         },
+      }, {
+        projection: {
+          images: false,
+        }
       }
     );
 
@@ -284,10 +288,7 @@ const billAddLineItem = publicProcedure
       return null;
     }
 
-    return {
-      bill: updatedBill,
-      lineItem,
-    };
+    return updatedBill;
   });
 
 /**
