@@ -1,10 +1,10 @@
 import { Draft, PayloadAction, createSlice } from "@reduxjs/toolkit";
 
 import { IBill, IImage } from "../../../../api/src/models/bill";
-import { Loadable, newLoaded, newLoading } from "../../lib/loadable";
+import { Loadable, isLoaded, isLoading, newLoaded, newLoading } from "../../lib/loadable";
 import { NotFoundable, isNotFound } from "../../lib/notFoundable";
 import { IBillWithoutImages } from "../../../../api/src/endpoints.ts/bill";
-import { Errorable, isErrored } from "../../lib/errorable";
+import { Errorable, isErrored, newErrored, newSuccess } from "../../lib/errorable";
 
 /**
  * Bill reducer state.
@@ -14,19 +14,13 @@ export type BillsState = {
    * Bills loaded into store.
    * If a bill is not found it shouldn't exist in this object (Instead of using the NotFoundable type).
    */
-  bills: {
-    [key: string]: {
-      /**
-       * The bill without images.
-       */
-      bill: Errorable<Error, Loadable<IBillWithoutImages>>,
+  bills: { [key: string]: Errorable<Error, Loadable<IBillWithoutImages>> },
 
-      /**
-       * The bill's images.
-       */
-      images: Errorable<Error, Loadable<IImage[]>>,
-    },
-  },
+   /**
+   * Bil images loaded into store.
+   * If a bill is not found it shouldn't exist in this object (Instead of using the NotFoundable type).
+   */
+  billImages: { [key: string]: Errorable<Error, Loadable<IImage[]>> },
 };
 
 /**
@@ -34,32 +28,64 @@ export type BillsState = {
  */
 const initBillsState: BillsState = {
   bills: {},
+  billImages: {},
 };
 
-const fetchBill = (state: Draft<BillsState>, action: PayloadAction<{
-  billID: string,
-  bill: Errorable<Error, NotFoundable<IBillWithoutImages>>,
-}>) => {
+/**
+ * Reducer for fetchBill action. Stores bill.
+ * @param state Reducer state
+ * @param action fetchBill action
+ */
+const fetchBill = (
+  state: Draft<BillsState>,
+  action: PayloadAction<{
+    billID: string,
+    bill: Errorable<Error, NotFoundable<IBillWithoutImages>>,
+  }>,
+) => {
   const { billID, bill } = action.payload;
 
   if (isErrored(bill)) {
+    // Error
     state.bills[billID] = bill;
+  } else {
+    // Bill not found
+    if (isNotFound(bill.data)) {
+      delete state.bills[billID];
+      return;
+    } 
+
+    // Loading or loaded
+    state.bills[billID] = newSuccess(bill.data);
   }
+};
 
-  // Bill not found
-  if (isNotFound(bill)) {
-    delete state.bills[billID];
-    return;
+/**
+ * Reducer for fetchBillImages action. Stores bill images.
+ * @param state Reducer state draft
+ * @param action fetchBillImages reducer
+ */
+const fetchBillImages = (
+  state: Draft<BillsState>,
+  action: PayloadAction<{
+    billID: string,
+    images: Errorable<Error, NotFoundable<IImage[]>>,
+  }>,
+) => {
+  const { billID, images } = action.payload;
+
+  if (isErrored(images)) {
+    // Errored
+    state.billImages[billID] = images;
+  } else { 
+    // Bill not found
+    if (isNotFound(images.data)) {
+      delete state.billImages[billID];
+      return;
+    }
+    
+    state.billImages[billID] = newSuccess(images.data);
   }
-
-  // Update state entry for bill
-  const billState = billID in state.bills ? state.bills[billID] : {
-    bill,
-    images: newLoaded([]),
-  };
-  billState.bill = bill;
-
-  state.bills[billID] = billState;
 };
 
 /**
@@ -70,26 +96,6 @@ export const billsSlice = createSlice({
   initialState: initBillsState,
   reducers: {
     fetchBill,
-
-    fetchBillImages: (state, action: PayloadAction<{
-      billID: string,
-      images: NotFoundable<IImage[]>,
-    }>) => {
-      const { billID, images } = action.payload;
-
-      // Bill not found
-      if (isNotFound(images)) {
-        delete state.bills[billID];
-        return;
-      }
-
-      // Update state entry for bill
-      const billState = billID in state.bills ? state.bills[billID] : {
-        bill: newLoading(),
-        images,
-      };
-      
-      state.bills[billID] = billState;
-    },
+    fetchBillImages,
   }
 });
