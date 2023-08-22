@@ -46,8 +46,8 @@ export function ViewBill() {
     return;
   }
 
-  const bill = useSelector((state: State) => selectBillByID(state, id));
-  const billImages = useSelector((state: State) => selectBillImagesByID(state, id));
+  const bill = useSelector(selectBillByID(id));
+  const billImages = useSelector(selectBillImagesByID(id));
 
   const doFetchBill = useCallback(async () => {
     // Set loading

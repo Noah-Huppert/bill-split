@@ -30,7 +30,7 @@ export type Success<S> = {
  * @param error Error data
  * @returns New error state errorable
  */
-export const newErrored = <F, S,>(error: F): Errorable<F, S> => {
+export const newErrored = <F, S,>(error: F): Errored<F> => {
   return {
     _tag: "errored",
     error,
@@ -44,7 +44,7 @@ export const newErrored = <F, S,>(error: F): Errorable<F, S> => {
  * @param success Success data
  * @returns New success state errorable
  */
-export const newSuccess = <F, S,>(success: S): Errorable<F, S> => {
+export const newSuccess = <F, S,>(success: S): Success<S> => {
   return {
     _tag: "success",
     data: success,
