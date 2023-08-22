@@ -13,13 +13,14 @@ import { ToasterCtx } from "../../components/Toaster/Toaster";
 import { IBill, IImage } from "../../../../api/src/models/bill";
 import { ImageUploadDetails, Images } from "./Images/Images";
 import { IBillWithoutImages } from "../../../../api/src/endpoints.ts/bill";
-import { isLoaded, isLoading, newLoading } from "../../lib/loadable";
+import { Loadable, isLoaded, isLoading, newLoading } from "../../lib/loadable";
 import {
   NotFoundable,
   isNotFound,
   newLoadedOrNotFound,
   newNotFound,
   newNotFoundableFromKey,
+  notFoundableAsLoadable,
 } from "../../lib/notFoundable";
 import { LineItems } from "./LineItems/LineItems";
 import { fetchBill, fetchBillImages } from "../../store/bills/actions";
@@ -132,21 +133,7 @@ export function ViewBill() {
     }));
   };
 
-  if (isErrored(bill)) {
-    console.error(`Error loading bill ${id}: ${bill.error}`);
-
-    return (
-      <>
-        <ViewBillBreadcrumbs bill={bill} />
-
-        <Typography variant="h1">
-          Error loading bill
-        </Typography>
-      </>
-    )
-  }
-
-  if (isNotFound(bill.data)) {
+  if (isSuccess(bill) && isNotFound(bill.data) || isSuccess(billImages) && isNotFound(billImages)) {
     return (
       <>
         <ViewBillBreadcrumbs bill={bill} />
@@ -155,8 +142,11 @@ export function ViewBill() {
           Bill not found
         </Typography>
       </>
-    )
+    );
   }
+
+  const foundBill: Errorable<Error, Loadable<IBillWithoutImages>> = isSuccess(bill) ? newSuccess(notFoundableAsLoadable(bill.data)) : bill;
+  const foundBillImages: Errorable<Error, Loadable<IImage[]>> = isSuccess(billImages) ? newSuccess(notFoundableAsLoadable(billImages.data)) : billImages;
 
   return (
     <>
@@ -192,12 +182,15 @@ export function ViewBill() {
             />
             Line Item
           </Button>
-          <LineItems bill={bill.data} />
+          <LineItems
+            billID={id}
+            bill={foundBill}
+          />
         </Box>
         <Images
           onUpload={onImageUpload}
           onDelete={onImageDelete}
-          images={billImages}
+          images={foundBillImages}
         />
       </Box>
     </>

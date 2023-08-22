@@ -61,3 +61,16 @@ export function newNotFoundableFromKey<P, K extends keyof P>(parent: NotFoundabl
 
   return newLoaded<P[K]>(parent.data[key]);
 }
+
+/**
+ * Forcefully converts a NotFoundable to a Loadable. If is NotFound then throws an error. Use when Typescript type narrowing cannot detect that the type will never be NotFound.
+ * @param notFoundable The NotFoundable
+ * @returns NotFoundable as Loadable
+ */
+export function notFoundableAsLoadable<D>(notFoundable: NotFoundable<D>): Loadable<D> {
+  if (isNotFound(notFoundable)) {
+    throw new Error("Not found");
+  }
+
+  return notFoundable;
+}

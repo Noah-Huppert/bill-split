@@ -27,6 +27,7 @@ import { Loadable, isLoaded, isLoading } from "../../../lib/loadable";
 import { Loading } from "../../../components/Loading/Loading";
 
 import "./Images.scss";
+import { Errorable, isErrored, isSuccess } from "../../../lib/errorable";
 
 /**
  * Displays images for a bill.
@@ -36,7 +37,7 @@ export function Images({
   onUpload,
   onDelete,
 }: {
-  readonly images: Loadable<IImage[]>;
+  readonly images: Errorable<Error, Loadable<IImage[]>>;
   readonly onUpload: (images: ImageUploadDetails[]) => Promise<void>;
   readonly onDelete: (imageID: string) => Promise<void>;
 }) {
@@ -78,7 +79,7 @@ export function Images({
             Images
           </Typography>
 
-          {isLoaded(images) && images.data.length > 0 && (
+          {isSuccess(images) && isLoaded(images.data) && images.data.data.length > 0 && (
             <IconButton onClick={() => setUploadMenuOpen(true)}>
               <AddPhotoAlternateIcon />
               <Typography>Add Photos</Typography>
@@ -86,7 +87,11 @@ export function Images({
           )}
         </Box>
 
-        {isLoading(images) ? (
+        {isErrored(images) ? (
+          <Box>
+            Error loading images
+          </Box>
+        ) : isLoading(images.data) ? (
           <Box
             sx={{
               padding: "10%",
@@ -96,7 +101,7 @@ export function Images({
           </Box>
         ) : (
           <ImagesContent
-            images={images.data}
+            images={images.data.data}
             setUploadMenuOpen={(open: boolean) => setUploadMenuOpen(open)}
             onUpload={onUpload}
             onDelete={onDelete}

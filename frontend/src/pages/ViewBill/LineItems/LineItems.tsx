@@ -12,9 +12,11 @@ import { IBillWithoutImages } from "../../../../../api/src/endpoints.ts/bill";
 import { Errorable, isErrored } from "../../../lib/errorable";
 
 export function LineItems({
+  billID,
   bill,
 }: {
-  readonly bill: Loadable<IBillWithoutImages>
+  readonly billID: string,
+  readonly bill: Errorable<Error, Loadable<IBillWithoutImages>>
 }) {
   return (
     <>
@@ -37,7 +39,10 @@ export function LineItems({
 
             
             <TableBody>
-              <LineItemsBody bill={bill} />
+              <LineItemsBody
+                billID={billID}
+                bill={bill}
+              />
             </TableBody>
           </Table>
         </TableContainer>
@@ -47,11 +52,31 @@ export function LineItems({
 }
 
 function LineItemsBody({
+  billID,
   bill,
 }: {
-  readonly bill: Loadable<IBillWithoutImages>,
+  readonly billID: string,
+  readonly bill: Errorable<Error, Loadable<IBillWithoutImages>>,
 }) {
-  if (isLoading(bill)) {
+  if (isErrored(bill)) {
+    console.error(`Error loading bill ${billID}: ${bill.error}`);
+
+    return (
+      <TableRow>
+        <TableCell
+          colSpan={4}
+          sx={{
+            borderBottom: "none",
+            padding: "10%",
+          }}
+        >
+          Error loading bill
+        </TableCell>
+      </TableRow>
+    )
+  }
+
+  if (isLoading(bill.data)) {
     return (
       <TableRow>
         <TableCell
@@ -67,7 +92,7 @@ function LineItemsBody({
     )
   }
 
-  if (bill.data.lineItems.length === 0) {
+  if (bill.data.data.lineItems.length === 0) {
     return (
       <TableRow>
         <TableCell
@@ -100,25 +125,26 @@ function LineItemsBody({
           </Box>
         </TableCell>
       </TableRow>
-    )
+    );
   }
 
   const doUpdateLineItem = async (lineItem: ILineItem): Promise<ILineItem> => {
     // Update line item
     const updatedLineItem = await trpc.billUpdateLineItem.mutate({
-      billID: bill.data._id,
+      billID,
       lineItem,
     });
     
     if (updatedLineItem === null) {
       throw new Error("Line item could not be found to update");
     }
+    
     return updatedLineItem;
   };
 
   return (
     <>
-      {bill.data.lineItems.map((lineItem) => (
+      {bill.data.data.lineItems.map((lineItem) => (
         <LineItem
           key={lineItem._id}
           lineItem={lineItem}
