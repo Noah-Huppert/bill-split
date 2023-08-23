@@ -1,46 +1,56 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { TextField, TableCell, TableRow } from "@mui/material";
-import { useDebounce } from "usehooks-ts";
 import { ILineItem } from "../../../../../api/src/models/bill";
-import { ToasterCtx } from "../../../components/Toaster/Toaster";
+import { trpc } from "../../../trpc";
+import { useDispatch } from "react-redux";
+import { fetchBill } from "../../../store/bills/actions";
+import { resolveSuccessOrErrored } from "../../../lib/errorable";
+import { newLoadedOrNotFound } from "../../../lib/notFoundable";
 
 export function LineItem({
+  billID,
   lineItem,
-  remoteUpdate,
 }: {
+  readonly billID: string,
   readonly lineItem: ILineItem,
-  readonly remoteUpdate: (lineItem: ILineItem) => Promise<ILineItem>,
 }) {
-  const toast = useContext(ToasterCtx);
+  const dispatch = useDispatch();
 
   const [localLineItem, setLocalLineItem] = useState(lineItem);
-  const debouncedLocalLineItem = useDebounce(localLineItem, 500);
+  const [updateTimeout, setUpdateTimeout] = useState<NodeJS.Timeout | null>(null);
 
-  const doUpdate = async (updatedLineItem: ILineItem): Promise<void> => {
-    // Send update to server
-    const newLineItem = await remoteUpdate(updatedLineItem);
+  useEffect(() => {
+    setLocalLineItem(lineItem);
+  }, [setLocalLineItem, lineItem]);
 
-    // Set line item to display as the version returned by the server
-    setLocalLineItem(newLineItem);
+  const onChange = (updatedLineItem: ILineItem) => {
+    setLocalLineItem(updatedLineItem);
+
+    // Check if any pending updates
+    if (updateTimeout !== null) {
+      // Cancel update
+      clearTimeout(updateTimeout);
+      setUpdateTimeout(null);
+    }
+
+    // Schedule update for future
+    setUpdateTimeout(setTimeout(async () => {
+      dispatch(fetchBill({
+        billID,
+        bill: await resolveSuccessOrErrored(async () => newLoadedOrNotFound(await trpc.billUpdateLineItem.mutate({
+          billID,
+          lineItem: updatedLineItem,
+        }))),
+      }));
+    }, 500));
   };
-
-  /* useEffect(() => {
-    // Send updates about local line item to server
-    doUpdate(debouncedLocalLineItem).catch((e) => toast({
-      _tag: "error",
-      error: {
-        userError: "Failed to save line item",
-        systemError: e.toString(),
-      },
-    }));
-  }, [debouncedLocalLineItem]); */
 
   return (
     <TableRow>
       <TableCell>
         <TextField
           value={localLineItem.name}
-          onChange={(e) => doUpdate({
+          onChange={(e) => onChange({
             ...localLineItem,
             name: e.target.value,
           })}

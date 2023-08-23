@@ -128,27 +128,13 @@ function LineItemsBody({
     );
   }
 
-  const doUpdateLineItem = async (lineItem: ILineItem): Promise<ILineItem> => {
-    // Update line item
-    const updatedLineItem = await trpc.billUpdateLineItem.mutate({
-      billID,
-      lineItem,
-    });
-    
-    if (updatedLineItem === null) {
-      throw new Error("Line item could not be found to update");
-    }
-    
-    return updatedLineItem;
-  };
-
   return (
     <>
       {bill.data.data.lineItems.map((lineItem) => (
         <LineItem
           key={lineItem._id}
+          billID={billID}
           lineItem={lineItem}
-          remoteUpdate={doUpdateLineItem}
         />
       ))}
     </>
