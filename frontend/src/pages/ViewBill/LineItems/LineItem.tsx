@@ -56,7 +56,16 @@ export function LineItem({
           })}
         />
       </TableCell>
-      <TableCell>{localLineItem.price}</TableCell>
+      <TableCell>
+        <TextField
+          type="number"
+          value={localLineItem.price}
+          onChange={(e) => onChange({
+            ...localLineItem,
+            price: parseInt(e.target.value, 10),
+          })}
+          />
+      </TableCell>
       <TableCell>{localLineItem.tags}</TableCell>
       <TableCell>{JSON.stringify(lineItem.usersSplit)}</TableCell>
     </TableRow>
